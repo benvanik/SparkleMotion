@@ -61,8 +61,18 @@
         var handled = true;
         switch (e.keyCode) {
           case 32:
+            console.log('starting');
             for (var n = 0; n < sequences.length; n++) {
-              sequences[n].play();
+              (function(n) {
+                sequences[n].play(function() {
+                  console.log('seq ' + n + ' ended');
+                });
+              })(n);
+            }
+            break;
+          case 88:
+            for (var n = 0; n < sequences.length; n++) {
+              sequences[n].stop();
             }
             break;
           default:

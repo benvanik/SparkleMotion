@@ -1,5 +1,8 @@
 // Copyright 2011 Ben Vanik. All Rights Reserved.
 
+// TODO: repeat
+// TODO: reverse
+
 goog.provide('sm.runtime.JavascriptRuntime');
 
 goog.require('goog.array');
@@ -131,8 +134,9 @@ sm.runtime.JavascriptState_ = function(timeline, scope) {
   this.playing = false;
   /** @type {number} */
   this.startTime = 0;
-  /** @type {boolean} */
-  this.needsReset = false;
+
+  /** @type {?function} */
+  this.callback = null;
 
   /** @type {Array.<sm.runtime.JavascriptTween_>} */
   this.tweens = [];
@@ -201,6 +205,11 @@ sm.runtime.JavascriptState_.prototype.constructTweens_ = function() {
  * Reset any state used during playback.
  */
 sm.runtime.JavascriptState_.prototype.reset = function() {
+  this.playing = false;
+  this.startTime = 0;
+
+  this.callback = null;
+
   this.startIndex = 0;
 };
 
@@ -323,8 +332,10 @@ sm.runtime.JavascriptRuntime.prototype.tick_ = function(opt_time) {
   for (var n = 0; n < this.actives_.length; n++) {
     var active = this.actives_[n];
     if (!active.tick(time)) {
-      active.playing = false;
-      active.startTime = 0;
+      if (active.callback) {
+        active.callback();
+      }
+      active.reset();
       this.actives_.splice(n, 1);
       n--;
     }
@@ -348,25 +359,27 @@ sm.runtime.JavascriptRuntime.prototype.prepare =  function(timeline, scope) {
 /**
  * @override
  */
-sm.runtime.JavascriptRuntime.prototype.play = function(state) {
+sm.runtime.JavascriptRuntime.prototype.play = function(state, opt_callback) {
   state = /** @type {sm.runtime.JavascriptState_} */(state);
 
-  // Allowing restart on play for now
-  //if (state.playing) {
-  //  return;
-  //}
+  var alreadyPlaying = state.playing;
+  if (alreadyPlaying) {
+    if (state.callback) {
+      state.callback();
+    }
+    state.reset();
+  }
 
   var time = goog.now();
 
-  if (state.needsReset) {
-    state.reset(time);
-  }
-
   state.playing = true;
   state.startTime = time;
-  state.needsReset = true;
 
-  this.actives_.push(state);
+  state.callback = opt_callback || null;
+
+  if (!alreadyPlaying) {
+    this.actives_.push(state);
+  }
 
   this.startTicking_();
 };
@@ -382,8 +395,11 @@ sm.runtime.JavascriptRuntime.prototype.stop = function(state) {
 
   goog.array.remove(this.actives_, state);
 
-  state.playing = false;
-  state.startTime = 0;
+  if (state.callback) {
+    state.callback();
+  }
+
+  state.reset();
 
   if (!this.actives_.length) {
     this.stopTicking_();

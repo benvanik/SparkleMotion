@@ -25,6 +25,7 @@ sm.runtime.Runtime.prototype.prepare = goog.abstractMethod;
 /**
  * Begin playback of a timeline.
  * @param {Object} state Runtime-specific state information.
+ * @param {function=} opt_callback Function called when the timeline ends.
  */
 sm.runtime.Runtime.prototype.play = goog.abstractMethod;
 

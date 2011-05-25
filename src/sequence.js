@@ -50,8 +50,8 @@ sm.Sequence = function(runtime, timeline, scope) {
 /**
  * Begin playback of the timeline.
  */
-sm.Sequence.prototype.play = function() {
-  this.runtime_.play(this.state_);
+sm.Sequence.prototype.play = function(opt_callback) {
+  this.runtime_.play(this.state_, opt_callback);
 };
 
 

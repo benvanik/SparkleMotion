@@ -42,7 +42,7 @@ sm.runtime.CssRuntime.prototype.prepare =  function(timeline, scope) {
 /**
  * @override
  */
-sm.runtime.CssRuntime.prototype.play = function(state) {
+sm.runtime.CssRuntime.prototype.play = function(state, opt_callback) {
   console.log('play');
 };
 
