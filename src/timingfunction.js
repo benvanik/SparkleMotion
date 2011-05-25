@@ -23,14 +23,14 @@ goog.provide('sm.TimingFunction');
  * More: http://matthewlein.com/ceaser/
  *
  * @constructor
- * @param {string|Array.<number>} value The named timing function or 4 number
+ * @param {!string|!Array.<number>} value The named timing function or 4 number
  *     values specifying the P1 and P2 points on the curve as
  *     [x1, y1, x2, y2] in the range [0-1].
  */
 sm.TimingFunction = function(value) {
   /**
    * Value of the timing function.
-   * @type {string|Array.<number>}
+   * @type {!string|!Array.<number>}
    */
   this.value = value;
 };

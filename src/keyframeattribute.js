@@ -135,7 +135,7 @@ sm.KeyframeAttribute.deserialize = function(data) {
       /** @type {string} */(data['name']),
       /** @type {string|number|undefined} */(data['value']),
       new sm.TimingFunction(
-          /** @type {string|Array.<number>} */(data['timingFunction'])));
+          /** @type {!string|!Array.<number>} */(data['timingFunction'])));
   return attribute;
 };
 

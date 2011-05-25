@@ -238,8 +238,6 @@ sm.runtime.JavascriptState_.prototype.constructTweens_ = function() {
   this.tweens.sort(function(a, b) {
     return a.startTime - b.startTime;
   });
-
-  console.log(this.tweens);
 };
 
 
@@ -439,6 +437,8 @@ sm.runtime.JavascriptRuntime.prototype.play = function(state, opt_callback) {
  * @override
  */
 sm.runtime.JavascriptRuntime.prototype.stop = function(state) {
+  state = /** @type {sm.runtime.JavascriptState_} */(state);
+
   if (!state.playing) {
     return;
   }
