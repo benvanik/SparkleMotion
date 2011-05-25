@@ -1,0 +1,61 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <title>SM Test 1</title>
+    <script src="../../closure-library/closure/goog/base.js"></script>
+    <script src="../lib/sm_deps.js"></script>
+    <script>
+      goog.require('sm');
+    </script>
+    <style type="text/css">
+      .box {
+        position: absolute;
+        left: 0;
+        top: 0;
+        width: 20px;
+        height: 20px;
+      }
+      #rbox {
+        left: 0px;
+        background-color: red;
+      }
+      #gbox {
+        left: 40px;
+        background-color: green;
+      }
+      #bbox {
+        left: 80px;
+        background-color: blue;
+      }
+    </style>
+  </head>
+  <body>
+    <div id="rbox" class="box"></div>
+    <div id="gbox" class="box"></div>
+    <div id="bbox" class="box"></div>
+    <script>
+      (function() {
+        var t = sm.createTimeline('move-down');
+        var a = t.animate('box');
+        a.keyframe(0.0).attribute('top', '0px');
+        a.keyframe(0.5).attribute('top', '50px');
+        a.keyframe(1.0).attribute('top', '60px');
+        console.log(t);
+        var ts = t.serialize();
+        console.log(ts);
+        var t2 = sm.loadTimeline(ts);
+        // TODO: compare t && t2
+
+        sm.sequenceTimeline(t, {
+          'box': document.getElementById('rbox')
+        }).play();
+        sm.sequenceTimeline(t, {
+          'box': document.getElementById('gbox')
+        }).play();
+        sm.sequenceTimeline(t, {
+          'box': document.getElementById('bbox')
+        }).play();
+      })();
+    </script>
+  </body>
+</html>
