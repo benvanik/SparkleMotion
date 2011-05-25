@@ -1,5 +1,4 @@
 /**
- * @license
  * Copyright 2011 Google Inc. All Rights Reserved.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -132,8 +131,11 @@ sm.KeyframeAttribute.prototype.setTimingFunction = function(timingFunction) {
  *     data.
  */
 sm.KeyframeAttribute.deserialize = function(data) {
-  var attribute = new sm.KeyframeAttribute(data.name, data.value,
-      new sm.TimingFunction(data.timingFunction));
+  var attribute = new sm.KeyframeAttribute(
+      /** @type {string} */(data['name']),
+      /** @type {string|number|undefined} */(data['value']),
+      new sm.TimingFunction(
+          /** @type {string|Array.<number>} */(data['timingFunction'])));
   return attribute;
 };
 
@@ -144,9 +146,9 @@ sm.KeyframeAttribute.deserialize = function(data) {
  */
 sm.KeyframeAttribute.prototype.serialize = function() {
   var data = {
-    name: this.name_,
-    value: this.value_,
-    timingFunction: this.timingFunction_.value
+    'name': this.name_,
+    'value': this.value_,
+    'timingFunction': this.timingFunction_.value
   };
   return data;
 };

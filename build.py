@@ -71,7 +71,7 @@ os.system(
   CLOSURE_BUILD + '/closurebuilder.py ' + ' '.join([
     '--root=' + CLOSURE_LIBRARY + '/',
     '--root=src/',
-    '--namespace="sm"',
+    '--namespace="SM"',
     '--compiler_jar=' + CLOSURE_COMPILER,
     '--output_mode=compiled',
     '--output_file=lib/sm_compiled.js' + ' ',

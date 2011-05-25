@@ -1,5 +1,4 @@
 /**
- * @license
  * Copyright 2011 Google Inc. All Rights Reserved.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -140,9 +139,12 @@ sm.Keyframe.prototype.removeAllAttributes = function() {
  * @return {sm.Keyframe} A new keyframe initialized with the given data.
  */
 sm.Keyframe.deserialize = function(data) {
-  var keyframe = new sm.Keyframe(data.time);
-  for (var n = 0; n < data.attributes.length; n++) {
-    var attribute = sm.KeyframeAttribute.deserialize(data.attributes[n]);
+  var keyframe = new sm.Keyframe(
+      /** @type {number} */(data['time']));
+  /** @type {Array.<Object>} */
+  var dataAttributes = data['attributes'];
+  for (var n = 0; n < dataAttributes.length; n++) {
+    var attribute = sm.KeyframeAttribute.deserialize(dataAttributes[n]);
     keyframe.addAttribute(attribute);
   }
   return keyframe;
@@ -155,12 +157,13 @@ sm.Keyframe.deserialize = function(data) {
  */
 sm.Keyframe.prototype.serialize = function() {
   var data = {
-    time: this.time_,
-    attributes: new Array(this.attributes_.length)
+    'time': this.time_,
+    'attributes': new Array(this.attributes_.length)
   };
+  var dataAttributes = data['attributes'];
   for (var n = 0; n < this.attributes_.length; n++) {
     var attribute = this.attributes_[n];
-    data.attributes[n] = attribute.serialize();
+    dataAttributes[n] = attribute.serialize();
   }
   return data;
 };

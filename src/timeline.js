@@ -1,5 +1,4 @@
 /**
- * @license
  * Copyright 2011 Google Inc. All Rights Reserved.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -125,9 +124,12 @@ sm.Timeline.prototype.removeAllAnimations = function() {
  * @return {sm.Timeline} A new timeline initialized with the given data.
  */
 sm.Timeline.deserialize = function(data) {
-  var timeline = new sm.Timeline(data.name);
-  for (var n = 0; n < data.animations.length; n++) {
-    var animation = sm.Animation.deserialize(data.animations[n]);
+  var timeline = new sm.Timeline(
+      /** @type {string} */(data['name']));
+  /** @type {Array.<Object>} */
+  var dataAnimations = data['animations'];
+  for (var n = 0; n < dataAnimations.length; n++) {
+    var animation = sm.Animation.deserialize(dataAnimations[n]);
     timeline.addAnimation(animation);
   }
   return timeline;
@@ -140,12 +142,13 @@ sm.Timeline.deserialize = function(data) {
  */
 sm.Timeline.prototype.serialize = function() {
   var data = {
-    name: this.name_,
-    animations: new Array(this.animations_.length)
+    'name': this.name_,
+    'animations': new Array(this.animations_.length)
   };
+  var dataAnimations = data['animations'];
   for (var n = 0; n < this.animations_.length; n++) {
     var animation = this.animations_[n];
-    data.animations[n] = animation.serialize();
+    dataAnimations[n] = animation.serialize();
   }
   return data;
 };

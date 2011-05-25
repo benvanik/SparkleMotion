@@ -1,5 +1,4 @@
 /**
- * @license
  * Copyright 2011 Google Inc. All Rights Reserved.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -15,8 +14,24 @@
  * limitations under the License.
  */
 
+goog.provide('SM');
+
 goog.require('sm');
+goog.require('sm.Sequence');
 
 
-goog.exportSymbol('sm', sm);
-goog.exportProperty(sm, 'loadTimeline', sm.loadTimeline);
+/**
+ * @define {boolean} Whether to export the 'SM' namespace.
+ */
+var EXPORT_SM = true;
+
+var SM = {};
+
+if (EXPORT_SM) {
+  goog.exportSymbol('SM', SM);
+  goog.exportProperty(SM, 'loadTimeline', sm.loadTimeline);
+  goog.exportProperty(SM, 'sequenceTimeline', sm.sequenceTimeline);
+
+  goog.exportProperty(sm.Sequence.prototype, 'play', sm.Sequence.prototype.play);
+  goog.exportProperty(sm.Sequence.prototype, 'stop', sm.Sequence.prototype.stop);
+}

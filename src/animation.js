@@ -1,5 +1,4 @@
 /**
- * @license
  * Copyright 2011 Google Inc. All Rights Reserved.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -181,9 +180,14 @@ sm.Animation.prototype.removeAllKeyframes = function() {
  * @return {sm.Animation} A new animation initialized with the given data.
  */
 sm.Animation.deserialize = function(data) {
-  var animation = new sm.Animation(data.target, data.repeat, data.alternate);
-  for (var n = 0; n < data.keyframes.length; n++) {
-    var keyframe = sm.Keyframe.deserialize(data.keyframes[n]);
+  var animation = new sm.Animation(
+      /** @type {string} */(data['target']),
+      /** @type {boolean|undefined} */(data['repeat']),
+      /** @type {boolean|undefined} */(data['alternate']));
+  /** @type {Array.<Object>} */
+  var dataKeyframes = data['keyframes'];
+  for (var n = 0; n < dataKeyframes.length; n++) {
+    var keyframe = sm.Keyframe.deserialize(dataKeyframes[n]);
     animation.addKeyframe(keyframe);
   }
   return animation;
@@ -196,14 +200,15 @@ sm.Animation.deserialize = function(data) {
  */
 sm.Animation.prototype.serialize = function() {
   var data = {
-    target: this.target_,
-    repeat: this.repeat_,
-    alternate: this.alternate_,
-    keyframes: new Array(this.keyframes_.length)
+    'target': this.target_,
+    'repeat': this.repeat_,
+    'alternate': this.alternate_,
+    'keyframes': new Array(this.keyframes_.length)
   };
+  var dataKeyframes = data['keyframes'];
   for (var n = 0; n < this.keyframes_.length; n++) {
     var keyframe = this.keyframes_[n];
-    data.keyframes[n] = keyframe.serialize();
+    dataKeyframes[n] = keyframe.serialize();
   }
   return data;
 };

@@ -1,5 +1,4 @@
 /**
- * @license
  * Copyright 2011 Google Inc. All Rights Reserved.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -104,7 +103,8 @@ sm.runtime.JavascriptNumberTween_ = function(target, key, startTime, duration,
     this.to = parseFloat(to);
   } else {
     this.from = from;
-    this.to = to;
+    goog.asserts.assert(goog.isNumber(to));
+    this.to = /** @type {number} */(to);
   }
 };
 goog.inherits(sm.runtime.JavascriptNumberTween_, sm.runtime.JavascriptTween_);
@@ -192,7 +192,7 @@ sm.runtime.JavascriptState_.prototype.constructTweens_ = function() {
     var animation = animations[n];
     var target = this.scope.get(animation.getTarget());
 
-    /** @type {Object.<string, *>} */
+    /** @type {Object.<string, string|number>} */
     var attributeValues = {};
 
     var keyframes = animation.getKeyframes();
@@ -213,6 +213,10 @@ sm.runtime.JavascriptState_.prototype.constructTweens_ = function() {
         var timingFunction = sm.TimingFunction.getEvaluator(
             attribute.getTimingFunction());
         var to = attribute.getValue();
+        if (!goog.isDef(to)) {
+          // TODO: pull from source and massage into string|number
+          to = target[key];
+        }
         /** @type {number|string} */
         var from;
         if (!m) {
