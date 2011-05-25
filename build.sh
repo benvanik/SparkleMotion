@@ -1,6 +1,6 @@
 #!/bin/sh
 
-# Copyright 2011 Ben Vanik. All Rights Reserved.
+# Copyright 2011 Google Inc. All Rights Reserved.
 
 CLOSURE=../closure-library
 CLOSURE_BUILD=$CLOSURE/closure/bin/build
