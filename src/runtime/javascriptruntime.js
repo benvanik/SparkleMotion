@@ -99,19 +99,9 @@ goog.inherits(sm.runtime.JavascriptNumberTween_, sm.runtime.JavascriptTween_);
 /**
  * @override
  */
-sm.runtime.JavascriptNumberTween_.prototype.tick = function(time, reverse) {
-  var from;
-  var to;
-  if (!reverse) {
-    from = this.from;
-    to = this.to;
-  } else {
-    from = this.to;
-    to = this.from;
-  }
-
+sm.runtime.JavascriptNumberTween_.prototype.tick = function(time) {
   if (!this.duration) {
-    this.target[this.key] = this.unit ? (to + this.unit) : to;
+    this.target[this.key] = this.unit ? (this.to + this.unit) : this.to;
     return false;
   }
 
@@ -119,7 +109,7 @@ sm.runtime.JavascriptNumberTween_.prototype.tick = function(time, reverse) {
   var ta = (time - this.startTime) / this.duration;
   ta = ta > 1 ? 1 : ta;
   var fa = this.timingFunction(ta, this.epsilon);
-  var v = from + fa *(to - from);
+  var v = this.from + fa *(this.to - this.from);
   if (this.unit) {
     v = v + this.unit;
   }
@@ -245,7 +235,7 @@ sm.runtime.JavascriptState_.prototype.tick = function(time) {
       break;
     }
 
-    if (tween.tick(t, this.reverse)) {
+    if (tween.tick(t)) {
       anyUpdating = true;
       firstIndex = Math.min(firstIndex, n);
     }
