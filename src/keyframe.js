@@ -87,7 +87,8 @@ sm.Keyframe.prototype.addAttribute = function(attribute) {
 
 /**
  * Get the list of attributes in the keyframe.
- * @return {Array.<sm.KeyframeAttribute>} All attributes in the keyframe. Do not mutate.
+ * @return {Array.<sm.KeyframeAttribute>} All attributes in the keyframe.
+ *     Do not mutate.
  */
 sm.Keyframe.prototype.getAttributes = function() {
   return this.attributes_;
