@@ -114,7 +114,7 @@ sm.runtime.JavascriptNumberTween_.prototype.tick = function(time) {
     v = v + this.unit;
   }
   this.target[this.key] = v;
-  return (fa < 1.0);
+  return (fa <= 1.0);
 };
 
 
@@ -141,6 +141,8 @@ sm.runtime.JavascriptState_ = function(timeline, scope) {
   /** @type {?function} */
   this.callback = null;
 
+  /** @type {number} */
+  this.totalDuration = 0;
   /** @type {Array.<sm.runtime.JavascriptTween_>} */
   this.tweens = [];
 
@@ -188,6 +190,7 @@ sm.runtime.JavascriptState_.prototype.constructTweens_ = function() {
         duration = time - keyframes[m - 1].getTime() * 1000;
       }
       var startTime = time - duration;
+      this.totalDuration = Math.max(time, this.totalDuration);
 
       var attributes = keyframe.getAttributes();
       for (var o = 0; o < attributes.length; o++) {
@@ -207,6 +210,8 @@ sm.runtime.JavascriptState_.prototype.constructTweens_ = function() {
         this.tweens.push(tween);
       }
     }
+
+    // TODO: stash attributeValues for setup
   }
 
   // Sort by starting time
@@ -226,22 +231,36 @@ sm.runtime.JavascriptState_.prototype.constructTweens_ = function() {
 sm.runtime.JavascriptState_.prototype.tick = function(time) {
   var t = time - this.startTime;
 
-  var firstIndex = this.tweens.length - 1;
   var anyUpdating = false;
 
-  for (var n = this.startIndex; n < this.tweens.length; n++) {
-    var tween = this.tweens[n];
-    if (tween.startTime > t) {
-      break;
+  if (!this.reverse) {
+    var firstIndex = this.tweens.length - 1;
+    for (var n = this.startIndex; n < this.tweens.length; n++) {
+      var tween = this.tweens[n];
+      if (tween.startTime > t) {
+        break;
+      }
+      if (tween.tick(t)) {
+        anyUpdating = true;
+        firstIndex = Math.min(firstIndex, n);
+      }
     }
-
-    if (tween.tick(t)) {
-      anyUpdating = true;
-      firstIndex = Math.min(firstIndex, n);
+    this.startIndex = firstIndex;
+  } else {
+    t = this.totalDuration - t;
+    var firstIndex = 0;
+    for (var n = this.startIndex; n >= 0; n--) {
+      var tween = this.tweens[n];
+      if (tween.startTime + tween.duration < t) {
+        break;
+      }
+      if (tween.tick(t)) {
+        anyUpdating = true;
+        firstIndex = Math.min(firstIndex, n);
+      }
     }
+    this.startIndex = firstIndex;
   }
-
-  this.startIndex = firstIndex;
 
   return anyUpdating;
 };
@@ -379,6 +398,12 @@ sm.runtime.JavascriptRuntime.prototype.play = function(state, opt_callback) {
   state.playing = true;
   state.reverse = false;
   state.startTime = time;
+
+  // For reverse:
+  //state.reverse = true;
+  //state.startIndex = state.tweens.length - 1;
+
+  // TODO: propagate starting values
 
   state.callback = opt_callback || null;
 
