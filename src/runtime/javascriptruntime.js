@@ -46,6 +46,7 @@ sm.runtime.JavascriptTween_ = function(target, key, startTime, duration,
 /**
  * Update the tween value.
  * @param {number} time Current timeline-relative time, in ms.
+ * @param {boolean} reverse Whether to reverse the tween.
  * @return {boolean} True if still updating.
  */
 sm.runtime.JavascriptTween_.prototype.tick = goog.abstractMethod;
@@ -98,9 +99,19 @@ goog.inherits(sm.runtime.JavascriptNumberTween_, sm.runtime.JavascriptTween_);
 /**
  * @override
  */
-sm.runtime.JavascriptNumberTween_.prototype.tick = function(time) {
+sm.runtime.JavascriptNumberTween_.prototype.tick = function(time, reverse) {
+  var from;
+  var to;
+  if (!reverse) {
+    from = this.from;
+    to = this.to;
+  } else {
+    from = this.to;
+    to = this.from;
+  }
+
   if (!this.duration) {
-    this.target[this.key] = this.unit ? (this.to + this.unit) : this.to;
+    this.target[this.key] = this.unit ? (to + this.unit) : to;
     return false;
   }
 
@@ -108,7 +119,7 @@ sm.runtime.JavascriptNumberTween_.prototype.tick = function(time) {
   var ta = (time - this.startTime) / this.duration;
   ta = ta > 1 ? 1 : ta;
   var fa = this.timingFunction(ta, this.epsilon);
-  var v = this.from + fa *(this.to - this.from);
+  var v = from + fa *(to - from);
   if (this.unit) {
     v = v + this.unit;
   }
@@ -132,6 +143,8 @@ sm.runtime.JavascriptState_ = function(timeline, scope) {
 
   /** @type {boolean} */
   this.playing = false;
+  /** @type {boolean} */
+  this.reverse = false;
   /** @type {number} */
   this.startTime = 0;
 
@@ -145,6 +158,20 @@ sm.runtime.JavascriptState_ = function(timeline, scope) {
   this.startIndex = 0;
 
   this.constructTweens_();
+};
+
+
+/**
+ * Reset any state used during playback.
+ */
+sm.runtime.JavascriptState_.prototype.reset = function() {
+  this.playing = false;
+  this.reverse = false;
+  this.startTime = 0;
+
+  this.callback = null;
+
+  this.startIndex = 0;
 };
 
 
@@ -202,19 +229,6 @@ sm.runtime.JavascriptState_.prototype.constructTweens_ = function() {
 
 
 /**
- * Reset any state used during playback.
- */
-sm.runtime.JavascriptState_.prototype.reset = function() {
-  this.playing = false;
-  this.startTime = 0;
-
-  this.callback = null;
-
-  this.startIndex = 0;
-};
-
-
-/**
  * Update all tweens.
  * @param {number} time Current system time.
  * @return {boolean} True if still updating.
@@ -231,7 +245,7 @@ sm.runtime.JavascriptState_.prototype.tick = function(time) {
       break;
     }
 
-    if (tween.tick(t)) {
+    if (tween.tick(t, this.reverse)) {
       anyUpdating = true;
       firstIndex = Math.min(firstIndex, n);
     }
@@ -373,6 +387,7 @@ sm.runtime.JavascriptRuntime.prototype.play = function(state, opt_callback) {
   var time = goog.now();
 
   state.playing = true;
+  state.reverse = false;
   state.startTime = time;
 
   state.callback = opt_callback || null;
