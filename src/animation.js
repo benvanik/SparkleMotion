@@ -10,17 +10,17 @@ goog.require('sm.Keyframe');
  * An animation defined against a target object.
  *
  * @constructor
- * @param {string} targetId Target object ID.
+ * @param {string} target Target object specifier.
  * @param {boolean=} opt_repeat Whether to repeat indefinitely.
  * @param {boolean=} opt_alternate Whether to alternate direction on repeats.
  */
-sm.Animation = function(targetId, opt_repeat, opt_alternate) {
+sm.Animation = function(target, opt_repeat, opt_alternate) {
   /**
-   * Target object ID.
+   * Target object specifier.
    * @private
    * @type {string}
    */
-  this.targetId_ = targetId;
+  this.target_ = target;
 
   /**
    * Whether to repeat once the animation completes until the timeline ends.
@@ -53,11 +53,11 @@ sm.Animation = function(targetId, opt_repeat, opt_alternate) {
 
 
 /**
- * Get the unique ID of the target object.
- * @return {string} Target object ID.
+ * Get the specifier of the target object.
+ * @return {string} Target object specifier.
  */
-sm.Animation.prototype.getTargetId = function() {
-  return this.targetId_;
+sm.Animation.prototype.getTarget = function() {
+  return this.target_;
 }
 
 
@@ -166,7 +166,7 @@ sm.Animation.prototype.removeAllKeyframes = function() {
  * @return {sm.Animation} A new animation initialized with the given data.
  */
 sm.Animation.deserialize = function(data) {
-  var animation = new sm.Animation(data.targetId, data.repeat, data.alternate);
+  var animation = new sm.Animation(data.target, data.repeat, data.alternate);
   for (var n = 0; n < data.keyframes.length; n++) {
     var keyframe = sm.Keyframe.deserialize(data.keyframes[n]);
     animation.addKeyframe(keyframe);
@@ -181,7 +181,7 @@ sm.Animation.deserialize = function(data) {
  */
 sm.Animation.prototype.serialize = function() {
   var data = {
-    targetId: this.targetId_,
+    target: this.target_,
     repeat: this.repeat_,
     alternate: this.alternate_,
     keyframes: new Array(this.keyframes_.length)

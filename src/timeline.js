@@ -47,13 +47,13 @@ sm.Timeline.prototype.getName = function() {
 
 /**
  * Create and add an animation to the timeline.
- * @param {string} targetId Target object ID.
+ * @param {string} target Target object specifier.
  * @param {boolean=} opt_repeat Whether to repeat indefinitely.
  * @param {boolean=} opt_alternate Whether to alternate direction on repeats.
  * @return {sm.Animation} A new animation instance.
  */
-sm.Timeline.prototype.animate = function(targetId, opt_repeat, opt_alternate) {
-  var animation = new sm.Animation(targetId, opt_repeat, opt_alternate);
+sm.Timeline.prototype.animate = function(target, opt_repeat, opt_alternate) {
+  var animation = new sm.Animation(target, opt_repeat, opt_alternate);
   this.addAnimation(animation);
   return animation;
 };

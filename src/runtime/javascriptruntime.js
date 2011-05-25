@@ -153,7 +153,7 @@ sm.runtime.JavascriptState_.prototype.constructTweens_ = function() {
   var animations = this.timeline.getAnimations();
   for (var n = 0; n < animations.length; n++) {
     var animation = animations[n];
-    var target = this.scope.get(animation.getTargetId()).style;
+    var target = this.scope.get(animation.getTarget());
 
     /** @type {Object.<string, *>} */
     var attributeValues = {};

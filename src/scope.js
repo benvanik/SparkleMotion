@@ -31,18 +31,34 @@ sm.Scope = function(browserScope, opt_map) {
 
 
 /**
- * Get a target object by ID.
- * @param {string} id The unique ID of the object.
+ * Get a target object by specifier. For example, 'foo' or 'foo.member'.
+ * @param {string} specifier The specifier of the object.
  * @return {?Object} Target object, or null if not found.
  */
-sm.Scope.prototype.get = function(id) {
-  var value = this[id];
-  if (value) {
-    return value;
-  } else if (this.browserScope_) {
-    return document.getElementById(id);
+sm.Scope.prototype.get = function(specifier) {
+  var id = specifier;
+  var path = null;
+  var n = specifier.indexOf('.');
+  if (n > 0) {
+    id = specifier.substr(0, n);
+    path = specifier.substr(n + 1);
   }
-  return null;
+  var value = this[id];
+  if (!value && this.browserScope_) {
+    value = document.getElementById(id);
+  }
+  while (value && path && path.length) {
+    n = path.indexOf('.');
+    if (n > 0) {
+      id = path.substr(0, n);
+      path = path.substr(n + 1);
+    } else {
+      id = path;
+      path = null;
+    }
+    value = value[id];
+  }
+  return value;
 };
 
 
