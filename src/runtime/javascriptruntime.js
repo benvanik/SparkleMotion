@@ -79,7 +79,7 @@ sm.runtime.JavascriptNumberTween_ = function(target, key, startTime, duration,
   if (goog.isString(from)) {
     for (var n = 0; n < from.length; n++) {
       var c = from.charCodeAt(n);
-      if (!(c >= 48 && c <= 57) && c != 64 && c != 101 && c != 69 && c != 45) {
+      if (!(c >= 48 && c <= 57) && c != 46 && c != 101 && c != 69 && c != 45) {
         this.unit = from.substr(n);
         from = from.substr(0, n);
         to = to.substr(0, to.length - this.unit.length);
