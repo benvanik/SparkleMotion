@@ -73,7 +73,7 @@ sm.loadTimeline = function(data) {
  * Setup a playback sequence.
  * @param {sm.Timeline} timeline Timeline to start playing.
  * @param {Object.<string, Object>=} opt_scope Target lookup map.
- * @return {sm.runtime.Controller} A new playback sequence.
+ * @return {sm.Sequence} A new playback sequence.
  */
 sm.sequenceTimeline = function(timeline, opt_scope) {
   if (!sm.runtime_) {

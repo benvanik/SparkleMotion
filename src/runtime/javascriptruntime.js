@@ -54,14 +54,13 @@ sm.runtime.JavascriptTween_ = function(target, key, startTime, duration,
   /**
    * @type {function(number, number): number} timingFunction Timing function.
    */
-  this.timingFunction = sm.TimingFunction.getEvaluator(timingFunction);
+  this.timingFunction = timingFunction;
 };
 
 
 /**
  * Update the tween value.
  * @param {number} time Current timeline-relative time, in ms.
- * @param {boolean} reverse Whether to reverse the tween.
  * @return {boolean} True if still updating.
  */
 sm.runtime.JavascriptTween_.prototype.tick = goog.abstractMethod;
@@ -153,7 +152,7 @@ sm.runtime.JavascriptState_ = function(timeline, scope) {
   /** @type {number} */
   this.startTime = 0;
 
-  /** @type {?function} */
+  /** @type {?Function} */
   this.callback = null;
 
   /** @type {number} */
@@ -211,7 +210,10 @@ sm.runtime.JavascriptState_.prototype.constructTweens_ = function() {
       for (var o = 0; o < attributes.length; o++) {
         var attribute = attributes[o];
         var key = attribute.getName();
+        var timingFunction = sm.TimingFunction.getEvaluator(
+            attribute.getTimingFunction());
         var to = attribute.getValue();
+        /** @type {number|string} */
         var from;
         if (!m) {
           from = to;
@@ -220,8 +222,7 @@ sm.runtime.JavascriptState_.prototype.constructTweens_ = function() {
         }
         attributeValues[key] = to;
         var tween = new sm.runtime.JavascriptNumberTween_(
-            target, key, startTime, duration,
-            attribute.getTimingFunction(), from, to);
+            target, key, startTime, duration, timingFunction, from, to);
         this.tweens.push(tween);
       }
     }
@@ -320,7 +321,7 @@ sm.runtime.JavascriptRuntime = function() {
 
   /**
    * @private
-   * @type {function}
+   * @type {function(Function, HTMLElement=): void}
    */
   this.requestAnimationFrame_ =
       window['webkitRequestAnimationFrame'] ||

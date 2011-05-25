@@ -78,7 +78,7 @@ sm.TimingFunction.EASE_IN_OUT = new sm.TimingFunction('ease-in-out');
  * @param {number} p1y Control point 1 Y.
  * @param {number} p2x Control point 2 X.
  * @param {number} p2y Control point 2 Y.
- * @return {function(number, number): number} Timing function evaluator.
+ * @return {function(number, number=): number} Timing function evaluator.
  */
 sm.TimingFunction.generateCubicBezier = function(p1x, p1y, p2x, p2y) {
   // From WebKit's UnitBezier.h
@@ -141,7 +141,7 @@ sm.TimingFunction.generateCubicBezier = function(p1x, p1y, p2x, p2y) {
 /**
  * A cache of evaluator functions.
  * @private
- * @type {Object.<string, function(number, number=): number}
+ * @type {Object.<string, function(number, number=): number>}
  */
 sm.TimingFunction.evaluators_ = {};
 
@@ -160,7 +160,9 @@ sm.TimingFunction.getEvaluator = function(timingFunction) {
   var value = sm.TimingFunction.evaluators_[key];
   if (!value) {
     value = sm.TimingFunction.evaluators_[key] =
-        sm.TimingFunction.generateCubicBezier.apply(null, timingFunction.value);
+        sm.TimingFunction.generateCubicBezier(
+            timingFunction.value[0], timingFunction.value[1],
+            timingFunction.value[2], timingFunction.value[3]);
   }
   return value;
 };
@@ -169,7 +171,7 @@ sm.TimingFunction.getEvaluator = function(timingFunction) {
 /**
  * cubic-bezier(0.25, 0.1, 0.25, 1.0)
  * @param {number} a [0-1] Input alpha.
- * @param {number} epsilon Maximum error value.
+ * @param {number=} opt_epsilon Maximum error value.
  * @return {number} Modified alpha.
  */
 sm.TimingFunction.evaluators_['ease'] =
@@ -179,10 +181,10 @@ sm.TimingFunction.evaluators_['ease'] =
 /**
  * cubic-bezier(0.0, 0.0, 1.0, 1.0)
  * @param {number} a [0-1] Input alpha.
- * @param {number} epsilon Maximum error value.
+ * @param {number=} opt_epsilon Maximum error value.
  * @return {number} Modified alpha.
  */
-sm.TimingFunction.evaluators_['linear'] = function(a, epsilon) {
+sm.TimingFunction.evaluators_['linear'] = function(a, opt_epsilon) {
   return a;
 };
 
@@ -190,10 +192,10 @@ sm.TimingFunction.evaluators_['linear'] = function(a, epsilon) {
 /**
  * cubic-bezier(0.42, 0.0, 1.0, 1.0)
  * @param {number} a [0-1] Input alpha.
- * @param {number} epsilon Maximum error value.
+ * @param {number=} opt_epsilon Maximum error value.
  * @return {number} Modified alpha.
  */
-sm.TimingFunction.evaluators_['ease-in'] = function(a, epsilon) {
+sm.TimingFunction.evaluators_['ease-in'] = function(a, opt_epsilon) {
   return a * a * a;
 };
 
@@ -201,10 +203,10 @@ sm.TimingFunction.evaluators_['ease-in'] = function(a, epsilon) {
 /**
  * cubic-bezier(0.0, 0.0, 0.58, 1.0)
  * @param {number} a [0-1] Input alpha.
- * @param {number} epsilon Maximum error value.
+ * @param {number=} opt_epsilon Maximum error value.
  * @return {number} Modified alpha.
  */
-sm.TimingFunction.evaluators_['ease-out'] = function(a, epsilon) {
+sm.TimingFunction.evaluators_['ease-out'] = function(a, opt_epsilon) {
   a--;
   return a * a * a + 1;
 };
@@ -213,10 +215,10 @@ sm.TimingFunction.evaluators_['ease-out'] = function(a, epsilon) {
 /**
  * cubic-bezier(0.42, 0.0, 0.58, 1.0)
  * @param {number} a [0-1] Input alpha.
- * @param {number} epsilon Maximum error value.
+ * @param {number=} opt_epsilon Maximum error value.
  * @return {number} Modified alpha.
  */
-sm.TimingFunction.evaluators_['ease-in-out'] = function(a, epsilon) {
+sm.TimingFunction.evaluators_['ease-in-out'] = function(a, opt_epsilon) {
   a *= 2;
   if (a < 1) {
     return 0.5 * a * a * a;

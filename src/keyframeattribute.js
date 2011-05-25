@@ -41,7 +41,7 @@ sm.KeyframeAttribute = function(name, opt_value, opt_timingFunction) {
   /**
    * Value of the attribute at the keyframe.
    * @private
-   * @type {string|number=}
+   * @type {string|number|undefined}
    */
   this.value_ = opt_value;
 
@@ -85,7 +85,7 @@ sm.KeyframeAttribute.prototype.setName = function(name) {
 
 /**
  * Get the target attribute value.
- * @return {string|number=} The target attribute value.
+ * @return {string|number|undefined} The target attribute value.
  */
 sm.KeyframeAttribute.prototype.getValue = function() {
   return this.value_;
@@ -94,7 +94,7 @@ sm.KeyframeAttribute.prototype.getValue = function() {
 
 /**
  * Set the target attribute value.
- * @param {string|number=} value The target attribute value.
+ * @param {string|number|undefined} value The target attribute value.
  * @return {sm.KeyframeAttribute} The attribute, for chaining.
  */
 sm.KeyframeAttribute.prototype.setValue = function(value) {
@@ -128,7 +128,8 @@ sm.KeyframeAttribute.prototype.setTimingFunction = function(timingFunction) {
 /**
  * Deserialize an attribute from a previously-serialized JSON object.
  * @param {Object} data JSON-format serialized attribute.
- * @return {sm.Animation} A new attribute initialized with the given data.
+ * @return {sm.KeyframeAttribute} A new attribute initialized with the given
+ *     data.
  */
 sm.KeyframeAttribute.deserialize = function(data) {
   var attribute = new sm.KeyframeAttribute(data.name, data.value,
