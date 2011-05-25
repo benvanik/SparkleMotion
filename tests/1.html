@@ -34,28 +34,47 @@
     <div id="gbox" class="box"></div>
     <div id="bbox" class="box"></div>
     <script>
+      var sequences = [];
       (function() {
         var t = sm.createTimeline('move-down');
         var a = t.animate('box');
         a.keyframe(0.0).attribute('top', '0px').attribute('opacity', '0');
         a.keyframe(0.5).attribute('top', '50px').attribute('opacity', '1');
-        a.keyframe(1.0).attribute('top', '60px');
+        a.keyframe(1.0).attribute('top', '160px');
         console.log(t);
         var ts = t.serialize();
         console.log(ts);
         var t2 = sm.loadTimeline(ts);
         // TODO: compare t && t2
 
-        sm.sequenceTimeline(t, {
+        sequences.push(sm.sequenceTimeline(t, {
           'box': document.getElementById('rbox')
-        }).play();
-        sm.sequenceTimeline(t, {
+        }));
+        sequences.push(sm.sequenceTimeline(t, {
           'box': document.getElementById('gbox')
-        }).play();
-        sm.sequenceTimeline(t, {
+        }));
+        sequences.push(sm.sequenceTimeline(t2, {
           'box': document.getElementById('bbox')
-        }).play();
+        }));
       })();
+      document.addEventListener('keydown', function(e) {
+        var handled = true;
+        switch (e.keyCode) {
+          case 32:
+            for (var n = 0; n < sequences.length; n++) {
+              sequences[n].play();
+            }
+            break;
+          default:
+            handled = false;
+            break;
+        }
+        if (handled) {
+          e.preventDefault();
+          e.stopPropagation();
+          return false;
+        }
+      }, false);
     </script>
   </body>
 </html>

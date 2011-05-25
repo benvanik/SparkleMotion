@@ -96,6 +96,11 @@ goog.inherits(sm.runtime.JavascriptNumberTween_, sm.runtime.JavascriptTween_);
  * @override
  */
 sm.runtime.JavascriptNumberTween_.prototype.tick = function(time) {
+  if (!this.duration) {
+    this.target[this.key] = this.unit ? (this.to + this.unit) : this.to;
+    return false;
+  }
+
   // [0-1]
   var ta = (time - this.startTime) / this.duration;
   ta = ta > 1 ? 1 : ta;
@@ -149,17 +154,32 @@ sm.runtime.JavascriptState_.prototype.constructTweens_ = function() {
   for (var n = 0; n < animations.length; n++) {
     var animation = animations[n];
     var target = this.scope.get(animation.getTargetId()).style;
+
+    /** @type {Object.<string, *>} */
+    var attributeValues = {};
+
     var keyframes = animation.getKeyframes();
     for (var m = 0; m < keyframes.length; m++) {
       var keyframe = keyframes[m];
-      var startTime = keyframe.getTime() * 1000;
-      var duration = /* next time*/ 1000; // TODO --------------------------------------------------------------------
+      var time = keyframe.getTime() * 1000;
+      var duration = 0;
+      if (m) {
+        duration = time - keyframes[m - 1].getTime() * 1000;
+      }
+      var startTime = time - duration;
+
       var attributes = keyframe.getAttributes();
       for (var o = 0; o < attributes.length; o++) {
         var attribute = attributes[o];
         var key = attribute.getName();
-        var from = '20px'; // TODO --------------------------------------------------------------------
-        var to = '200px'; // TODO --------------------------------------------------------------------
+        var to = attribute.getValue();
+        var from;
+        if (!m) {
+          from = to;
+        } else {
+          from = attributeValues[key];
+        }
+        attributeValues[key] = to;
         var tween = new sm.runtime.JavascriptNumberTween_(
             target, key, startTime, duration,
             attribute.getTimingFunction(), from, to);
@@ -331,9 +351,10 @@ sm.runtime.JavascriptRuntime.prototype.prepare =  function(timeline, scope) {
 sm.runtime.JavascriptRuntime.prototype.play = function(state) {
   state = /** @type {sm.runtime.JavascriptState_} */(state);
 
-  if (state.playing) {
-    return;
-  }
+  // Allowing restart on play for now
+  //if (state.playing) {
+  //  return;
+  //}
 
   var time = goog.now();
 
