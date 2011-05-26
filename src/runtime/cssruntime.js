@@ -27,6 +27,76 @@ goog.require('sm.runtime.Runtime');
 
 
 /**
+ * User-Agent values for CSS Animations.
+ * @private
+ * @constructor
+ */
+sm.runtime.CssAgent_ = function() {
+  var prefixes = ['Webkit', 'Moz', 'O', 'ms'];
+  var prefix = '';
+  for (var n = 0; n < prefixes.length; n++) {
+    if (goog.isDef(document.body.style[prefixes[n] + 'AnimationName'])) {
+      prefix = prefixes[n];
+      break;
+    }
+  }
+
+  var addPrefix = function(name) {
+    if (prefix.length) {
+      return prefix + name.substr(0, 1).toUpperCase() + name.substr(1);
+    }
+    return name;
+  };
+
+  this.animationName = addPrefix('animationName');
+  this.animationDelay = addPrefix('animationDelay');
+  this.animationDuration = addPrefix('animationDuration');
+  this.animationTimingFunction = addPrefix('animationTimingFunction');
+  this.animationFillMode = addPrefix('animationFillMode');
+
+  switch (prefix) {
+    default:
+    case '':
+    case 'Moz':
+      this.animationstart = 'animationstart';
+      this.animationend = 'animationend';
+      this.animationiteration = 'animationiteration';
+      break;
+    case 'Webkit':
+      this.animationstart = 'webkitAnimationStart';
+      this.animationend = 'webkitAnimationEnd';
+      this.animationiteration = 'webkitAnimationIteration';
+      break;
+    case 'O':
+      this.animationstart = 'OAnimationStart';
+      this.animationend = 'OAnimationEnd';
+      this.animationiteration = 'OAnimationIteration';
+      break;
+    case 'ms':
+      this.animationstart = 'msAnimationStart';
+      this.animationend = 'msAnimationEnd';
+      this.animationiteration = 'msAnimationIteration';
+      break;
+  }
+
+  if (prefix.length) {
+    this.atkeyframes = '@-' + prefix.toLowerCase() + '-keyframes';
+  } else {
+    this.atkeyframes = '@keyframes';
+  }
+};
+
+
+/**
+ * Global User-Agent CSS Animations helper.
+ * @private
+ * @type {sm.runtime.CssAgent_}
+ */
+sm.runtime.cssAgent_ = null;
+
+
+
+/**
  * CSS Animations individual animation state.
  * @private
  * @constructor
@@ -101,7 +171,6 @@ sm.runtime.CssAnimation_.prototype.finalize = function() {
       this.finalAttributes[keyframe[m].name] = keyframe[m].value;
     }
   }
-  console.log(this.finalAttributes);
 
   // Generate CSS
   var s = '';
@@ -121,13 +190,6 @@ sm.runtime.CssAnimation_.prototype.finalize = function() {
  * @param {boolean} end Go to the end of the animation.
  */
 sm.runtime.CssAnimation_.prototype.clearStyle = function(end) {
-  // TODO: proper names
-  var animationName = 'webkitAnimationName';
-  var animationDelay = 'webkitAnimationDelay';
-  var animationDuration = 'webkitAnimationDuration';
-  var animationTimingFunction = 'webkitAnimationTimingFunction';
-  var animationFillMode = 'webkitAnimationFillMode';
-
   var finalAttributes = this.finalAttributes;
   if (!end) {
     finalAttributes = window.getComputedStyle(this.el, null);
@@ -140,11 +202,12 @@ sm.runtime.CssAnimation_.prototype.clearStyle = function(end) {
   }, this);
 
   // TODO: remove just self
-  this.style[animationName] = '';
-  this.style[animationDelay] = '';
-  this.style[animationDuration] = '';
-  this.style[animationTimingFunction] = '';
-  //this.style[animationFillMode] = '';
+  var agent = sm.runtime.cssAgent_;
+  this.style[agent.animationName] = '';
+  this.style[agent.animationDelay] = '';
+  this.style[agent.animationDuration] = '';
+  this.style[agent.animationTimingFunction] = '';
+  //this.style[agent.animationFillMode] = '';
 };
 
 
@@ -152,24 +215,18 @@ sm.runtime.CssAnimation_.prototype.clearStyle = function(end) {
  * Set the style to kickoff the animation.
  */
 sm.runtime.CssAnimation_.prototype.setStyle = function() {
-  // TODO: proper names
-  var animationName = 'webkitAnimationName';
-  var animationDelay = 'webkitAnimationDelay';
-  var animationDuration = 'webkitAnimationDuration';
-  var animationTimingFunction = 'webkitAnimationTimingFunction';
-  var animationFillMode = 'webkitAnimationFillMode';
-
   // Set final state
   goog.object.forEach(this.finalAttributes, function(value, key) {
     this.style[key] = value;
   }, this);
 
   // TODO: append
-  this.style[animationName] = this.name;
-  this.style[animationDelay] = this.delay + 's';
-  this.style[animationDuration] = this.duration + 's';
-  this.style[animationTimingFunction] = this.timingFunction;
-  //this.style[animationFillMode] = 'both';
+  var agent = sm.runtime.cssAgent_;
+  this.style[agent.animationName] = this.name;
+  this.style[agent.animationDelay] = this.delay + 's';
+  this.style[agent.animationDuration] = this.duration + 's';
+  this.style[agent.animationTimingFunction] = this.timingFunction;
+  //this.style[agent.animationFillMode] = 'both';
 };
 
 
@@ -224,7 +281,8 @@ sm.runtime.CssState_.nextId_ = 0;
 
 
 /**
- * 
+ * Cache of CSS keyframe fragments (minus the @keyframe).
+ * Maps the fragment contents to a previously-defined animation name.
  * @private
  * @type {Object.<string, string>}
  */
@@ -299,7 +357,7 @@ sm.runtime.CssState_.prototype.constructAnimations_ = function() {
       }
     }
 
-    var keyframeRule = '@-webkit-keyframes';
+    var agent = sm.runtime.cssAgent_;
     goog.object.forEach(cssAnimations, function(value) {
       value.finalize();
       var fragment = value.cssFragment;
@@ -308,7 +366,7 @@ sm.runtime.CssState_.prototype.constructAnimations_ = function() {
         value.name = oldName;
       } else {
         value.name = 'sm_a' + sm.runtime.CssState_.nextId_++;
-        var w = keyframeRule + ' "' + value.name + '" { \n';
+        var w = agent.atkeyframes + ' "' + value.name + '" { \n';
         w += fragment;
         w += '}\n';
         styleSheet += w;
@@ -320,12 +378,6 @@ sm.runtime.CssState_.prototype.constructAnimations_ = function() {
   if (styleSheet.length) {
     goog.cssom.addCssText(styleSheet);
   }
-
-  /*var animationendName = 'webkitAnimationEnd';
-  this.boundEndCallback = goog.bind(function(e) {
-    if (e.animationName == this.name) {
-    }
-  }, this);*/
 };
 
 
@@ -375,10 +427,11 @@ sm.runtime.CssRuntime.prototype.play = function(state, opt_callback) {
   state.playing = true;
   state.playToken = playToken;
 
-  // TODO: propagate starting values
+  // TODO: propagate starting values?
 
   state.callback = opt_callback || null;
 
+  // TODO: callback on event instead of guessing
   window.setTimeout(function() {
     if (state.playToken === playToken) {
       if (state.callback) {
@@ -425,6 +478,8 @@ sm.runtime.CssRuntime.prototype.stop = function(state) {
  * @return {boolean} True if the CSS runtime is supported on this browser.
  */
 sm.runtime.CssRuntime.detect = function() {
-  // TODO: detect if CSS Animations are supported
-  return true;
+  if (!sm.runtime.cssAgent_) {
+    sm.runtime.cssAgent_ = new sm.runtime.CssAgent_();
+  }
+  return goog.isDef(document.body.style[sm.runtime.cssAgent_.animationName]);
 };
