@@ -14,6 +14,14 @@
  * limitations under the License.
  */
 
+// TODO: repeat
+// TODO: reverse
+// TODO: diff timings per attribute:
+//   - slice in and out of animation css list
+//     animation-name: a, b, c;
+//     animation-delay: 0, 1, 2;
+//     -> remove b/1/etc
+
 goog.provide('sm.runtime.CssRuntime');
 
 goog.require('goog.array');

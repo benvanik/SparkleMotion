@@ -130,6 +130,13 @@ sm.Animation.prototype.keyframe = function(time) {
 
 
 /**
+ * Alias for keyframe - create and add a new keyframe.
+ * @return {sm.Keyframe} A new keyframe instance.
+ */
+sm.Animation.prototype.k = sm.Animation.prototype.keyframe;
+
+
+/**
  * Add a keyframe to the animation.
  * @param {sm.Keyframe} keyframe A keyframe to add.
  * @return {sm.Animation} The animation, for chaining.

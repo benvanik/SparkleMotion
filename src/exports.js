@@ -18,6 +18,7 @@ goog.provide('SM');
 
 goog.require('sm');
 goog.require('sm.Sequence');
+goog.require('sm.TimingFunction');
 
 
 /**
@@ -32,6 +33,20 @@ if (EXPORT_SM) {
   goog.exportProperty(SM, 'loadTimeline', sm.loadTimeline);
   goog.exportProperty(SM, 'sequenceTimeline', sm.sequenceTimeline);
 
-  goog.exportProperty(sm.Sequence.prototype, 'play', sm.Sequence.prototype.play);
-  goog.exportProperty(sm.Sequence.prototype, 'stop', sm.Sequence.prototype.stop);
+  goog.exportProperty(sm.Sequence.prototype, 'play',
+      sm.Sequence.prototype.play);
+  goog.exportProperty(sm.Sequence.prototype, 'stop',
+      sm.Sequence.prototype.stop);
+
+  goog.exportSymbol('SM.TimingFunction', sm.TimingFunction);
+  goog.exportProperty(sm.TimingFunction, 'EASE',
+      sm.TimingFunction.EASE);
+  goog.exportProperty(sm.TimingFunction, 'LINEAR',
+      sm.TimingFunction.LINEAR);
+  goog.exportProperty(sm.TimingFunction, 'EASE',
+      sm.TimingFunction.EASE_IN);
+  goog.exportProperty(sm.TimingFunction, 'EASE_OUT',
+      sm.TimingFunction.EASE_OUT);
+  goog.exportProperty(sm.TimingFunction, 'EASE_IN_OUT',
+      sm.TimingFunction.EASE_IN_OUT);
 }

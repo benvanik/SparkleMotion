@@ -88,6 +88,17 @@ sm.Keyframe.prototype.attribute = function(name, opt_value,
 
 
 /**
+ * Alias for attribute - create an add an attribute.
+ * @param {string} name Target attribute name.
+ * @param {string|number=} opt_value Target attribute value.
+ * @param {sm.TimingFunction=} opt_timingFunction Timing function used to
+ *     evaluate the keyframe.
+ * @return {sm.Keyframe} The keyframe, for chaining.
+ */
+sm.Keyframe.prototype.a = sm.Keyframe.prototype.attribute;
+
+
+/**
  * Add an attribute to the keyframe.
  * @param {sm.KeyframeAttribute} attribute An attribute to add.
  * @return {sm.Keyframe} The keyframe, for chaining.
