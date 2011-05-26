@@ -19,8 +19,6 @@ goog.provide('sm');
 goog.require('sm.Scope');
 goog.require('sm.Sequence');
 goog.require('sm.Timeline');
-goog.require('sm.runtime.CssRuntime');
-goog.require('sm.runtime.JavascriptRuntime');
 goog.require('sm.runtime.Runtime');
 
 
@@ -36,11 +34,7 @@ sm.runtime_ = null;
  * Setup the global runtime singleton.
  */
 sm.setupRuntime_ = function() {
-  if (sm.runtime.CssRuntime.detect()) {
-    sm.runtime_ = new sm.runtime.CssRuntime();
-  } else {
-    sm.runtime_ = new sm.runtime.JavascriptRuntime();
-  }
+  sm.runtime_ = new sm.runtime.Runtime();
 };
 
 

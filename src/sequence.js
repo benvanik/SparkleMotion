@@ -55,7 +55,7 @@ sm.Sequence = function(runtime, timeline, scope) {
   /**
    * State used by the runtime.
    * @private
-   * @type {Object}
+   * @type {sm.runtime.PlaybackState}
    */
   this.state_ = this.runtime_.prepare(timeline, scope);
 };
