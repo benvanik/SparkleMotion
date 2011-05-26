@@ -55,6 +55,15 @@ sm.runtime.CssAnimation_ = function(el, style, delay, duration,
    * @type {Object.<string, Array.<{name: string, value}>>}
    */
   this.keyframeAttributes = {};
+
+  /**
+   * @type {Object.<string, *>}
+   */
+  this.finalAttributes = {};
+  /**
+   * @type {string}
+   */
+  this.cssFragment = '';
 };
 
 
@@ -78,10 +87,22 @@ sm.runtime.CssAnimation_.prototype.addAttributeKeyframe = function(percent,
 
 
 /**
- * Generate the CSS to represent the keyframes.
- * @return {string} A CSS blob with keyframe data.
+ * Perform all final operations on the complete animation.
  */
-sm.runtime.CssAnimation_.prototype.generateCssKeyframes = function() {
+sm.runtime.CssAnimation_.prototype.finalize = function() {
+  // Compute final values of each attribute
+  var allKeys = goog.object.getKeys(this.keyframeAttributes);
+  allKeys.sort(function(a, b) {
+    return parseFloat(a) - parseFloat(b);
+  });
+  for (var n = 0; n < allKeys.length; n++) {
+    var keyframe = this.keyframeAttributes[allKeys[n]];
+    for (var m = 0; m < keyframe.length; m++) {
+      this.finalAttributes[keyframe[m].name] = keyframe[m].value;
+    }
+  }
+  console.log(this.finalAttributes);
+
   // Generate CSS
   var s = '';
   goog.object.forEach(this.keyframeAttributes, function(attributes, key) {
@@ -91,14 +112,15 @@ sm.runtime.CssAnimation_.prototype.generateCssKeyframes = function() {
     }
     s += '  }\n';
   });
-  return s;
+  this.cssFragment = s;
 };
 
 
 /**
  * Clear the style for this specific animation.
+ * @param {boolean} end Go to the end of the animation.
  */
-sm.runtime.CssAnimation_.prototype.clearStyle = function() {
+sm.runtime.CssAnimation_.prototype.clearStyle = function(end) {
   // TODO: proper names
   var animationName = 'webkitAnimationName';
   var animationDelay = 'webkitAnimationDelay';
@@ -106,11 +128,14 @@ sm.runtime.CssAnimation_.prototype.clearStyle = function() {
   var animationTimingFunction = 'webkitAnimationTimingFunction';
   var animationFillMode = 'webkitAnimationFillMode';
 
-  var computedStyle = window.getComputedStyle(this.el, null);
+  var finalAttributes = this.finalAttributes;
+  if (!end) {
+    finalAttributes = window.getComputedStyle(this.el, null);
+  }
   goog.object.forEach(this.keyframeAttributes, function(attributes, key) {
     for (var n = 0; n < attributes.length; n++) {
       var name = attributes[n].name;
-      this.style[name] = computedStyle[name];
+      this.style[name] = finalAttributes[name];
     }
   }, this);
 
@@ -134,14 +159,10 @@ sm.runtime.CssAnimation_.prototype.setStyle = function() {
   var animationTimingFunction = 'webkitAnimationTimingFunction';
   var animationFillMode = 'webkitAnimationFillMode';
 
-  // Set initial state
-  var attributes = this.keyframeAttributes['100'];
-  if (attributes) {
-    for (var n = 0; n < attributes.length; n++) {
-      var name = attributes[n].name;
-      this.style[name] = attributes[n].value;
-    }
-  }
+  // Set final state
+  goog.object.forEach(this.finalAttributes, function(value, key) {
+    this.style[key] = value;
+  }, this);
 
   // TODO: append
   this.style[animationName] = this.name;
@@ -280,7 +301,8 @@ sm.runtime.CssState_.prototype.constructAnimations_ = function() {
 
     var keyframeRule = '@-webkit-keyframes';
     goog.object.forEach(cssAnimations, function(value) {
-      var fragment = value.generateCssKeyframes();
+      value.finalize();
+      var fragment = value.cssFragment;
       var oldName = sm.runtime.CssState_.cssFragmentCache_[fragment];
       if (oldName) {
         value.name = oldName;
@@ -367,7 +389,7 @@ sm.runtime.CssRuntime.prototype.play = function(state, opt_callback) {
   }, state.totalDuration * 1000);
 
   goog.array.forEach(state.animations, function(value) {
-    value.clearStyle();
+    value.clearStyle(false);
   });
   window.setTimeout(function() {
     goog.array.forEach(state.animations, function(value) {
@@ -388,7 +410,7 @@ sm.runtime.CssRuntime.prototype.stop = function(state) {
   }
 
   goog.array.forEach(state.animations, function(value) {
-    value.clearStyle();
+    value.clearStyle(false);
   });
 
   if (state.callback) {
