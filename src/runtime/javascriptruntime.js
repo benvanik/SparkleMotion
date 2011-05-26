@@ -128,7 +128,7 @@ sm.runtime.JavascriptNumberTween_.prototype.tick = function(time) {
     v = v + this.unit;
   }
   this.target[this.key] = v;
-  return (fa <= 1.0);
+  return (fa < 1.0);
 };
 
 

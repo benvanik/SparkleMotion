@@ -5,6 +5,7 @@
     <script src="../../closure-library/closure/goog/base.js"></script>
     <script src="../lib/sm_deps.js"></script>
     <script>
+      goog.require('goog.events.KeyHandler');
       goog.require('sm');
     </script>
     <style type="text/css">
@@ -58,7 +59,7 @@
           'box': document.getElementById('bbox')
         }));
       })();
-      document.addEventListener('keydown', function(e) {
+      function keydown(e) {
         var handled = true;
         switch (e.keyCode) {
           case 32:
@@ -85,7 +86,9 @@
           e.stopPropagation();
           return false;
         }
-      }, false);
+      };
+      var docKeyHandler = new goog.events.KeyHandler(document);
+      goog.events.listen(docKeyHandler, 'key', keydown);
     </script>
   </body>
 </html>
