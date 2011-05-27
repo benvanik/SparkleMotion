@@ -17,14 +17,8 @@
 goog.provide('sm.runtime.Runtime');
 
 goog.require('goog.array');
-goog.require('goog.string');
-goog.require('sm.Scope');
-goog.require('sm.Timeline');
-goog.require('sm.TimingFunction');
 goog.require('sm.runtime.PlaybackState');
-goog.require('sm.runtime.NumericTween');
 goog.require('sm.runtime.Timer');
-goog.require('sm.runtime.Tween');
 goog.require('sm.runtime.UserAgent');
 
 

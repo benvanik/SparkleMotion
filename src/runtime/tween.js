@@ -18,6 +18,7 @@ goog.provide('sm.runtime.NumericTween');
 goog.provide('sm.runtime.Tween');
 
 goog.require('goog.asserts');
+goog.require('goog.string');
 
 
 
