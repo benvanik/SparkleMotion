@@ -34,7 +34,9 @@ sm.runtime_ = null;
  * Setup the global runtime singleton.
  */
 sm.setupRuntime_ = function() {
-  sm.runtime_ = new sm.runtime.Runtime();
+  var allowCss = false;
+  var tickHz = 60;
+  sm.runtime_ = new sm.runtime.Runtime(allowCss, tickHz);
 };
 
 

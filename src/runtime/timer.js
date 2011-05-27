@@ -90,6 +90,7 @@ sm.runtime.Timer.prototype.start = function() {
   if (this.running_) {
     return;
   }
+  this.running_ = true;
   if (this.userAgent_.requestAnimationFrame) {
     this.userAgent_.requestAnimationFrame.call(window, this.boundTick_);
   } else {

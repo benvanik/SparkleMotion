@@ -231,7 +231,48 @@ sm.runtime.PlaybackState.prototype.construct_ = function(allowCss) {
  */
 sm.runtime.PlaybackState.prototype.addJavascriptAnimation_ =
     function(animation, target) {
-  //
+  /** @type {Object.<string, string|number>} */
+  var attributeValues = {};
+
+  var keyframes = animation.getKeyframes();
+  for (var m = 0; m < keyframes.length; m++) {
+    var keyframe = keyframes[m];
+    var time = keyframe.getTime();
+    var duration = 0;
+    if (m) {
+      duration = time - keyframes[m - 1].getTime();
+    }
+    var startTime = time - duration;
+
+    var attributes = keyframe.getAttributes();
+    for (var o = 0; o < attributes.length; o++) {
+      var attribute = attributes[o];
+      var key = attribute.getName();
+      var timingFunction = sm.TimingFunction.getEvaluator(
+          attribute.getTimingFunction());
+
+      var to = attribute.getValue();
+      if (!goog.isDef(to)) {
+        // TODO: pull from source and massage into string|number
+        to = target[key];
+      }
+      /** @type {number|string} */
+      var from;
+      if (!m) {
+        from = to;
+      } else {
+        from = attributeValues[key];
+      }
+
+      attributeValues[key] = to;
+
+      var tween = new sm.runtime.NumericTween(
+          target, key, startTime, duration, timingFunction, from, to);
+      this.tweens_.push(tween);
+    }
+  }
+
+  // TODO: stash attributeValues for setup
 };
 
 
@@ -304,7 +345,7 @@ sm.runtime.PlaybackState.prototype.start = function(playToken, opt_callback) {
 sm.runtime.PlaybackState.prototype.tick = function(time) {
   goog.asserts.assert(this.needsTick);
 
-  var t = time - this.startTime_;
+  var t = (time - this.startTime_) / 1000;
 
   var anyUpdating = false;
 

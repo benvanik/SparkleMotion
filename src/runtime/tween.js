@@ -125,3 +125,8 @@ sm.runtime.NumericTween.prototype.tick = function(time) {
   this.target[this.key] = v;
   return (fa < 1.0);
 };
+
+
+// TODO: ColorTween
+// TODO: TransformTween
+// TODO: StateTween (display/etc?)
