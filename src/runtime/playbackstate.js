@@ -266,9 +266,65 @@ sm.runtime.PlaybackState.prototype.addJavascriptAnimation_ =
 
       attributeValues[key] = to;
 
-      var tween = new sm.runtime.NumericTween(
-          target, key, startTime, duration, timingFunction, from, to);
-      this.tweens_.push(tween);
+      /** @type {boolean} */
+      var isNumeric = true;
+      /** @type {boolean} */
+      var isColor = true;
+      /** @type {boolean} */
+      var isTransform = true;
+      // etc...
+      /** @type {?function(Object, *): void} */
+      var setter = null;
+
+      // TODO: smarter/more efficient lookup
+      switch (key) {
+        case 'transform':
+          //setter = this.userAgent_.setTransform; // el?
+          break;
+        case 'opacity':
+          if (this.userAgent.ieDownlevelOpacity) {
+            setter = /** @type {function(Object, *): void} */
+                this.userAgent.setOpacity;
+          }
+          break;
+        default:
+          break;
+      }
+
+      /** @type {sm.runtime.Tween} */
+      var tween = null;
+      if (isNumeric) {
+        // Get the unit and massage the values
+        /** @type {?string} */
+        var unit = null;
+        if (from) {
+          unit = sm.runtime.Tween.getUnit(from);
+        } else if (to) {
+          unit = sm.runtime.Tween.getUnit(to);
+        }
+        if (unit) {
+          if (goog.isDef(from)) {
+            from = parseFloat(from);
+          }
+          if (goog.isDef(to)) {
+            to = parseFloat(to);
+          }
+        }
+
+        tween = new sm.runtime.NumericTween(
+            target, key, setter,
+            startTime, duration, timingFunction,
+            from, to, unit);
+      } else if (isColor) {
+        // TODO: ColorTween
+      } else if (isTransform) {
+        // TODO: TransformTween
+      }
+
+      goog.asserts.assert(tween);
+      if (tween) {
+        this.tweens_.push(tween);
+      }
     }
   }
 

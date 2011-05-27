@@ -230,17 +230,15 @@ sm.runtime.UserAgent.prototype.setupTransforms_ = function() {
 
 /**
  * Set the transition properties on the given style.
- * @param {HTMLElement} el Target HTML element.
  * @param {CSSStyleDeclaration} style CSS style declaration.
  */
-sm.runtime.UserAgent.prototype.setTransition = function(el, style) {
+sm.runtime.UserAgent.prototype.setTransition = function(style) {
   style[this.transition] = goog.isDef(opt_value) ? opt_value : '';
 };
 
 
 /**
  * Set the animation properties on the given style.
- * @param {HTMLElement} el Target HTML element.
  * @param {CSSStyleDeclaration} style CSS style declaration.
  * @param {string=} opt_name Animation name.
  * @param {number=} opt_delay Animation delay, in units time.
@@ -248,7 +246,7 @@ sm.runtime.UserAgent.prototype.setTransition = function(el, style) {
  * @param {string=} opt_timingFunction Timing function, in string form.
  * @param {string=} opt_fillMode Animation fill mode.
  */
-sm.runtime.UserAgent.prototype.setAnimation = function(el, style, opt_name,
+sm.runtime.UserAgent.prototype.setAnimation = function(style, opt_name,
     opt_delay, opt_duration, opt_timingFunction, opt_fillMode) {
   style[this.animationName] =
       goog.isDef(opt_name) ? opt_name : '';
@@ -276,12 +274,12 @@ sm.runtime.UserAgent.prototype.setTransform = function(el, style, opt_value) {
 
 /**
  * Set the opacity property on the given style.
- * @param {HTMLElement} el Target HTML element.
  * @param {CSSStyleDeclaration} style CSS style declaration.
  * @param {number=} opt_value New opacity value or undefined to reset.
  */
-sm.runtime.UserAgent.prototype.setOpacity = function(el, style, opt_value) {
-  if (this.ieDownlevelOpacity) {
+sm.runtime.UserAgent.prototype.setOpacity;
+if (goog.userAgent.IE && !goog.userAgent.isVersion(9)) {
+  sm.runtime.UserAgent.prototype.setOpacity = function(style, opt_value) {
     // Opacity only applies to positioned elements or elements with zoom: 1
     // Filters must be in this order:
     // -ms-filter: "progid:DXImageTransform.Microsoft.Alpha(Opacity=50)"
@@ -298,12 +296,14 @@ sm.runtime.UserAgent.prototype.setOpacity = function(el, style, opt_value) {
       style['-ms-filter'] = '';
       style['filter'] = '';
     }
-  } else {
+  };
+} else {
+  sm.runtime.UserAgent.prototype.setOpacity = function(style, opt_value) {
     if (goog.isDef(opt_value)) {
       style['opacity'] = opt_value;
     } else {
       style['opacity'] = '';
     }
-  }
+  };
 };
 

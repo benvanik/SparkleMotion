@@ -28,25 +28,26 @@ goog.require('goog.string');
  * @constructor
  * @param {Object} target Target object.
  * @param {string} key Property key on the target object.
+ * @param {?function(Object, *): void} setter Property value setter.
  * @param {number} startTime Timeline-relative time to start tweening.
  * @param {number} duration Duration of the tween, in ms.
  * @param {function(number): number} timingFunction Timing function.
  */
-sm.runtime.Tween = function(target, key, startTime, duration,
+sm.runtime.Tween = function(target, key, setter, startTime, duration,
     timingFunction) {
   /** @type {Object} */
   this.target = target;
   /** @type {string} */
   this.key = key;
+  /** @type {?function(Object, *): void} */
+  this.setter = setter;
   /** @type {number} */
   this.startTime = startTime;
   /** @type {number} */
   this.duration = duration;
   /** @type {number} */
   this.epsilon = 1 / (200 * this.duration / 1000);
-  /**
-   * @type {function(number, number): number} timingFunction Timing function.
-   */
+  /** @type {function(number, number): number} */
   this.timingFunction = timingFunction;
 };
 
@@ -59,6 +60,27 @@ sm.runtime.Tween = function(target, key, startTime, duration,
 sm.runtime.Tween.prototype.tick = goog.abstractMethod;
 
 
+/**
+ * Get the unit from a value-unit (e.g. '10px' -> 'px', 10 -> null).
+ * @param {string} value A value-unit to get the unit from.
+ * @return {?string} The unit or null if none specified.
+ */
+sm.runtime.Tween.getUnit = function(value) {
+  if (!goog.isString(value)) {
+    return null;
+  }
+  // Scan backwards looking for non-alpha characters
+  for (var n = value.length - 1; n >= 0; n--) {
+    var c = value.charCodeAt(n);
+    if ((c >= 48 && c <= 57) || c == 46 || c == 101 || c == 69 || c == 45) {
+      // Number-valid value
+      return value.substr(n + 1);
+    }
+  }
+  return null;
+};
+
+
 
 /**
  * A numerical property (with unit) tween specialization.
@@ -67,40 +89,24 @@ sm.runtime.Tween.prototype.tick = goog.abstractMethod;
  * @constructor
  * @param {Object} target Target object.
  * @param {string} key Property key on the target object.
+ * @param {?function(Object, *): void} setter Property value setter.
  * @param {number} startTime Timeline-relative time to start tweening, in ms.
  * @param {number} duration Duration of the tween, in ms.
  * @param {function(number): number} timingFunction Timing function.
- * @param {string|number} from The starting value.
- * @param {string|number} to The target value.
+ * @param {number|undefined} from The starting value.
+ * @param {number|undefined} to The target value.
+ * @param {?string} unit The unit of the values.
  */
-sm.runtime.NumericTween = function(target, key, startTime, duration,
-    timingFunction, from, to) {
-  goog.base(this, target, key, startTime, duration, timingFunction);
+sm.runtime.NumericTween = function(target, key, setter, startTime, duration,
+    timingFunction, from, to, unit) {
+  goog.base(this, target, key, setter, startTime, duration, timingFunction);
 
+  /** @type {number|undefined} */
+  this.from = from;
+  /** @type {number|undefined} */
+  this.to = to;
   /** @type {?string} */
-  this.unit = null;
-  /** @type {number} */
-  this.from;
-  /** @type {number} */
-  this.to;
-
-  if (goog.isString(from)) {
-    for (var n = 0; n < from.length; n++) {
-      var c = from.charCodeAt(n);
-      if (!(c >= 48 && c <= 57) && c != 46 && c != 101 && c != 69 && c != 45) {
-        this.unit = from.substr(n);
-        from = from.substr(0, n);
-        to = to.substr(0, to.length - this.unit.length);
-        break;
-      }
-    }
-    this.from = parseFloat(from);
-    this.to = parseFloat(to);
-  } else {
-    this.from = from;
-    goog.asserts.assert(goog.isNumber(to));
-    this.to = /** @type {number} */(to);
-  }
+  this.unit = unit;
 };
 goog.inherits(sm.runtime.NumericTween, sm.runtime.Tween);
 
@@ -110,7 +116,12 @@ goog.inherits(sm.runtime.NumericTween, sm.runtime.Tween);
  */
 sm.runtime.NumericTween.prototype.tick = function(time) {
   if (!this.duration) {
-    this.target[this.key] = this.unit ? (this.to + this.unit) : this.to;
+    var targetValue = this.unit ? (this.to + this.unit) : this.to;
+    if (this.setter) {
+      this.setter(this.target, targetValue);
+    } else {
+      this.target[this.key] = targetValue;
+    }
     return false;
   }
 
@@ -122,7 +133,12 @@ sm.runtime.NumericTween.prototype.tick = function(time) {
   if (this.unit) {
     v = v + this.unit;
   }
-  this.target[this.key] = v;
+
+  if (this.setter) {
+    this.setter(this.target, v);
+  } else {
+    this.target[this.key] = v;
+  }
   return (fa < 1.0);
 };
 
