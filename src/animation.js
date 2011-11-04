@@ -4,7 +4,7 @@
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- * 
+ *
  *     http://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
@@ -16,6 +16,7 @@
 
 goog.provide('sm.Animation');
 
+goog.require('goog.array');
 goog.require('sm.Keyframe');
 
 
@@ -41,19 +42,19 @@ sm.Animation = function(target, opt_repeat, opt_alternate) {
    * @private
    * @type {boolean}
    */
-  this.repeat_ = goog.isDef(opt_repeat) ? opt_repeat : false;
+  this.repeat_ = opt_repeat || false;
 
   /**
    * Whether to alternate direction on repeats.
    * @private
    * @type {boolean}
    */
-  this.alternate_ = goog.isDef(opt_alternate) ? opt_alternate : false;
+  this.alternate_ = opt_alternate || false;
 
   /**
    * All keyframes in the animation.
    * @private
-   * @type {Array.<sm.Keyframe>}
+   * @type {!Array.<!sm.Keyframe>}
    */
   this.keyframes_ = [];
 
@@ -67,7 +68,7 @@ sm.Animation = function(target, opt_repeat, opt_alternate) {
 
 
 /**
- * Get the specifier of the target object.
+ * Gets the specifier of the target object.
  * @return {string} Target object specifier.
  */
 sm.Animation.prototype.getTarget = function() {
@@ -76,7 +77,7 @@ sm.Animation.prototype.getTarget = function() {
 
 
 /**
- * Get the flag indicating whether the animation should repeat.
+ * Gets the flag indicating whether the animation should repeat.
  * @return {boolean} Whether or not the animation should repeat indefinitely.
  */
 sm.Animation.prototype.getRepeat = function() {
@@ -85,9 +86,9 @@ sm.Animation.prototype.getRepeat = function() {
 
 
 /**
- * Set the repeat flag.
+ * Sets the repeat flag.
  * @param {boolean} repeat Whether to repeat indefinitely.
- * @return {sm.Animation} The animation, for chaining.
+ * @return {!sm.Animation} The animation, for chaining.
  */
 sm.Animation.prototype.setRepeat = function(repeat) {
   this.repeat_ = repeat;
@@ -97,7 +98,7 @@ sm.Animation.prototype.setRepeat = function(repeat) {
 
 
 /**
- * Get the flag indicating whether the animation should alternate direction on
+ * Gets the flag indicating whether the animation should alternate direction on
  * repeat.
  * @return {boolean} Whether or not the animation should alternate on repeat.
  */
@@ -107,9 +108,9 @@ sm.Animation.prototype.getAlternate = function() {
 
 
 /**
- * Set the repeat alternate direction flag.
+ * Sets the repeat alternate direction flag.
  * @param {boolean} alternate Whether to alternate direction on repeats.
- * @return {sm.Animation} The animation, for chaining.
+ * @return {!sm.Animation} The animation, for chaining.
  */
 sm.Animation.prototype.setAlternate = function(alternate) {
   this.alternate_ = alternate;
@@ -119,8 +120,8 @@ sm.Animation.prototype.setAlternate = function(alternate) {
 
 
 /**
- * Create and add a new keyframe.
- * @return {sm.Keyframe} A new keyframe instance.
+ * Creates and adds a new keyframe.
+ * @return {!sm.Keyframe} A new keyframe instance.
  */
 sm.Animation.prototype.keyframe = function(time) {
   var keyframe = new sm.Keyframe(time);
@@ -130,16 +131,16 @@ sm.Animation.prototype.keyframe = function(time) {
 
 
 /**
- * Alias for keyframe - create and add a new keyframe.
- * @return {sm.Keyframe} A new keyframe instance.
+ * Alias for keyframe - creates and adds a new keyframe.
+ * @return {!sm.Keyframe} A new keyframe instance.
  */
 sm.Animation.prototype.k = sm.Animation.prototype.keyframe;
 
 
 /**
- * Add a keyframe to the animation.
- * @param {sm.Keyframe} keyframe A keyframe to add.
- * @return {sm.Animation} The animation, for chaining.
+ * Adds a keyframe to the animation.
+ * @param {!sm.Keyframe} keyframe A keyframe to add.
+ * @return {!sm.Animation} The animation, for chaining.
  */
 sm.Animation.prototype.addKeyframe = function(keyframe) {
   this.keyframes_.push(keyframe);
@@ -149,8 +150,9 @@ sm.Animation.prototype.addKeyframe = function(keyframe) {
 
 
 /**
- * Get the list of keyframes in the animation.
- * @return {Array.<sm.Keyframe>} All keyframes in the animation. Do not mutate.
+ * Gets the list of keyframes in the animation.
+ * @return {!Array.<!sm.Keyframe>} All keyframes in the animation.
+ *     Do not mutate.
  */
 sm.Animation.prototype.getKeyframes = function() {
   return this.keyframes_;
@@ -158,9 +160,9 @@ sm.Animation.prototype.getKeyframes = function() {
 
 
 /**
- * Remove a keyframe from the animation.
- * @param {sm.Keyframe} keyframe A keyframe to remove.
- * @return {sm.Animation} The animation, for chaining.
+ * Removes a keyframe from the animation.
+ * @param {!sm.Keyframe} keyframe A keyframe to remove.
+ * @return {!sm.Animation} The animation, for chaining.
  */
 sm.Animation.prototype.removeKeyframe = function(keyframe) {
   if (goog.array.remove(this.keyframes_, keyframe)) {
@@ -171,8 +173,8 @@ sm.Animation.prototype.removeKeyframe = function(keyframe) {
 
 
 /**
- * Remove all keyframes from the animation.
- * @return {sm.Animation} The animation, for chaining.
+ * Removes all keyframes from the animation.
+ * @return {!sm.Animation} The animation, for chaining.
  */
 sm.Animation.prototype.removeAllKeyframes = function() {
   this.keyframes_.length = 0;
@@ -182,28 +184,33 @@ sm.Animation.prototype.removeAllKeyframes = function() {
 
 
 /**
- * Deserialize an animation from a previously-serialized JSON object.
- * @param {Object} data JSON-format serialized animation.
- * @return {sm.Animation} A new animation initialized with the given data.
+ * Deserializes an animation from a previously-serialized JSON object.
+ * @param {!Object} data JSON-format serialized animation.
+ * @return {!sm.Animation} A new animation initialized with the given data.
  */
 sm.Animation.deserialize = function(data) {
-  var animation = new sm.Animation(
-      /** @type {string} */(data['target']),
-      /** @type {boolean|undefined} */(data['repeat']),
-      /** @type {boolean|undefined} */(data['alternate']));
-  /** @type {Array.<Object>} */
-  var dataKeyframes = data['keyframes'];
-  for (var n = 0; n < dataKeyframes.length; n++) {
-    var keyframe = sm.Keyframe.deserialize(dataKeyframes[n]);
-    animation.addKeyframe(keyframe);
-  }
+  var target = /** @type {string} */ (data['target']);
+  var repeat = /** @type {boolean|undefined} */ (data['repeat']);
+  var alternate = /** @type {boolean|undefined} */ (data['alternate']);
+  var animation = new sm.Animation(target, repeat, alternate);
+
+  var dataKeyframes = /** @type {!Array.<!Object>} */ (data['keyframes']);
+  goog.array.forEach(dataKeyframes,
+      /**
+       * @param {!Object} dataKeyframe Keyframe JSON.
+       */
+      function(dataKeyframe) {
+        var keyframe = sm.Keyframe.deserialize(dataKeyframe);
+        animation.addKeyframe(keyframe);
+      });
+
   return animation;
 };
 
 
 /**
- * Serialize the animation to a compact and round-trippable JSON object.
- * @return {Object} A JSON-format serialization of the entire animation.
+ * Serializes the animation to a compact and round-trippable JSON object.
+ * @return {!Object} A JSON-format serialization of the entire animation.
  */
 sm.Animation.prototype.serialize = function() {
   var data = {
@@ -212,11 +219,17 @@ sm.Animation.prototype.serialize = function() {
     'alternate': this.alternate_,
     'keyframes': new Array(this.keyframes_.length)
   };
+
   var dataKeyframes = data['keyframes'];
-  for (var n = 0; n < this.keyframes_.length; n++) {
-    var keyframe = this.keyframes_[n];
-    dataKeyframes[n] = keyframe.serialize();
-  }
+  goog.array.forEach(this.keyframes_,
+      /**
+       * @param {!sm.Keyframe} keyframe Source keyframe.
+       * @param {number} n Index.
+       */
+      function(keyframe, n) {
+        dataKeyframes[n] = keyframe.serialize();
+      });
+
   return data;
 };
 

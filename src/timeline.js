@@ -4,7 +4,7 @@
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- * 
+ *
  *     http://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
@@ -16,6 +16,7 @@
 
 goog.provide('sm.Timeline');
 
+goog.require('goog.array');
 goog.require('sm.Animation');
 
 
@@ -37,7 +38,7 @@ sm.Timeline = function(name) {
   /**
    * All animations in the timeline.
    * @private
-   * @type {Array.<sm.Animation>}
+   * @type {!Array.<!sm.Animation>}
    */
   this.animations_ = [];
 
@@ -51,7 +52,7 @@ sm.Timeline = function(name) {
 
 
 /**
- * Get the current unique timeline name.
+ * Gets the current unique timeline name.
  * @return {string} Unique timeline name.
  */
 sm.Timeline.prototype.getName = function() {
@@ -60,11 +61,11 @@ sm.Timeline.prototype.getName = function() {
 
 
 /**
- * Create and add an animation to the timeline.
+ * Creates and adds an animation to the timeline.
  * @param {string} target Target object specifier.
  * @param {boolean=} opt_repeat Whether to repeat indefinitely.
  * @param {boolean=} opt_alternate Whether to alternate direction on repeats.
- * @return {sm.Animation} A new animation instance.
+ * @return {!sm.Animation} A new animation instance.
  */
 sm.Timeline.prototype.animate = function(target, opt_repeat, opt_alternate) {
   var animation = new sm.Animation(target, opt_repeat, opt_alternate);
@@ -74,9 +75,9 @@ sm.Timeline.prototype.animate = function(target, opt_repeat, opt_alternate) {
 
 
 /**
- * Add an animation to the timeline.
- * @param {sm.Animation} animation An animation to add.
- * @return {sm.Timeline} The timeline, for chaining.
+ * Addd an animation to the timeline.
+ * @param {!sm.Animation} animation An animation to add.
+ * @return {!sm.Timeline} The timeline, for chaining.
  */
 sm.Timeline.prototype.addAnimation = function(animation) {
   this.animations_.push(animation);
@@ -86,8 +87,9 @@ sm.Timeline.prototype.addAnimation = function(animation) {
 
 
 /**
- * Get the list of animations in the timeline.
- * @return {Array.<sm.Animation>} All animations in the timeline. Do not mutate.
+ * Gets the list of animations in the timeline.
+ * @return {!Array.<!sm.Animation>} All animations in the timeline.
+ *     Do not mutate.
  */
 sm.Timeline.prototype.getAnimations = function() {
   return this.animations_;
@@ -95,9 +97,9 @@ sm.Timeline.prototype.getAnimations = function() {
 
 
 /**
- * Remove an animation from the timeline.
- * @param {sm.Animation} animation An animation to remove.
- * @return {sm.Timeline} The timeline, for chaining.
+ * Removes an animation from the timeline.
+ * @param {!sm.Animation} animation An animation to remove.
+ * @return {!sm.Timeline} The timeline, for chaining.
  */
 sm.Timeline.prototype.removeAnimation = function(animation) {
   if (goog.array.remove(this.animations_, animation)) {
@@ -108,8 +110,8 @@ sm.Timeline.prototype.removeAnimation = function(animation) {
 
 
 /**
- * Remove all animations from the timeline.
- * @return {sm.Timeline} The timeline, for chaining.
+ * Removes all animations from the timeline.
+ * @return {!sm.Timeline} The timeline, for chaining.
  */
 sm.Timeline.prototype.removeAllAnimations = function() {
   this.animations_.length = 0;
@@ -119,37 +121,48 @@ sm.Timeline.prototype.removeAllAnimations = function() {
 
 
 /**
- * Deserialize a timeline from a previously-serialized JSON object.
- * @param {Object} data JSON-format serialized timeline.
- * @return {sm.Timeline} A new timeline initialized with the given data.
+ * Deserializes a timeline from a previously-serialized JSON object.
+ * @param {!Object} data JSON-format serialized timeline.
+ * @return {!sm.Timeline} A new timeline initialized with the given data.
  */
 sm.Timeline.deserialize = function(data) {
-  var timeline = new sm.Timeline(
-      /** @type {string} */(data['name']));
-  /** @type {Array.<Object>} */
-  var dataAnimations = data['animations'];
-  for (var n = 0; n < dataAnimations.length; n++) {
-    var animation = sm.Animation.deserialize(dataAnimations[n]);
-    timeline.addAnimation(animation);
-  }
+  var name = /** @type {string} */ (data['name']);
+  var timeline = new sm.Timeline(name);
+
+  var dataAnimations = /** @type {!Array.<!Object>} */ (data['animations']);
+  goog.array.forEach(dataAnimations,
+      /**
+       * @param {!Object} dataAnimation Animation JSON object.
+       */
+      function (dataAnimation) {
+        var animation = sm.Animation.deserialize(dataAnimation);
+        timeline.addAnimation(animation);
+      });
+
   return timeline;
 };
 
 
 /**
- * Serialize the timeline to a compact and round-trippable JSON object.
- * @return {Object} A JSON-format serialization of the entire timeline.
+ * Serializes the timeline to a compact and round-trippable JSON object.
+ * @return {!Object} A JSON-format serialization of the entire timeline.
  */
 sm.Timeline.prototype.serialize = function() {
   var data = {
     'name': this.name_,
     'animations': new Array(this.animations_.length)
   };
+
   var dataAnimations = data['animations'];
-  for (var n = 0; n < this.animations_.length; n++) {
-    var animation = this.animations_[n];
-    dataAnimations[n] = animation.serialize();
-  }
+  goog.array.forEach(this.animations_,
+      /**
+       * @param {!sm.Animation} animation Source animation.
+       * @param {number} n Index.
+       */
+      function(animation, n) {
+        dataAnimations[n] = animation.serialize();
+      });
+
   return data;
 };
 

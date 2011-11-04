@@ -4,7 +4,7 @@
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- * 
+ *
  *     http://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
@@ -24,42 +24,44 @@ goog.require('goog.object');
  * A target lookup scope used for resolving animation identifiers.
  *
  * @constructor
- * @param {boolean} browserScope Whether or not to fall back to the browser
- *     element scope.
- * @param {Object.<string, Object>=} opt_map Map of IDs to target objects.
+ * @param {goog.dom.DomHelper=} opt_dom DOM helper to perform lookups in, if
+ *     browser scope support is desired.
+ * @param {Object.<!Object>=} opt_map Map of IDs to target objects.
  */
-sm.Scope = function(browserScope, opt_map) {
+sm.Scope = function(opt_dom, opt_map) {
   /**
-   * Whether or not this scope can fall back to browser elements.
+   * DOM to perform element lookups in, if any.
    * @private
-   * @type {boolean}
+   * @type {goog.dom.DomHelper}
    */
-  this.browserScope_ = browserScope;
+  this.dom_ = opt_dom || null;
 
-  if (opt_map) {
-    goog.object.forEach(opt_map, function(value, key) {
-      this[key] = value;
-    }, this);
-  }
+  /**
+   * Custom ID->target map.
+   * @private
+   * @type {!Object.<!Object>}
+   */
+  this.map_ = opt_map ? goog.object.clone(opt_map) : {};
 };
 
 
 /**
- * Get a target object by specifier. For example, 'foo' or 'foo.member'.
+ * Gets a target object by specifier. For example, 'foo' or 'foo.member'.
  * @param {string} specifier The specifier of the object.
- * @return {?Object} Target object, or null if not found.
+ * @return {Object} Target object, if found.
  */
 sm.Scope.prototype.get = function(specifier) {
   var id = specifier;
+  /** @type {?string} */
   var path = null;
   var n = specifier.indexOf('.');
   if (n > 0) {
     id = specifier.substr(0, n);
     path = specifier.substr(n + 1);
   }
-  var value = this[id];
-  if (!value && this.browserScope_) {
-    value = document.getElementById(id);
+  var value = this.map_[id];
+  if (!value && this.dom_) {
+    value = this.dom_.getElement(id);
   }
   while (value && path && path.length) {
     n = path.indexOf('.');
@@ -74,10 +76,3 @@ sm.Scope.prototype.get = function(specifier) {
   }
   return value;
 };
-
-
-/**
- * The default browser scope, falling back to document.getElementById.
- * @type {sm.Scope}
- */
-sm.Scope.browserScope = new sm.Scope(true);

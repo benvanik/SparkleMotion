@@ -4,7 +4,7 @@
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- * 
+ *
  *     http://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
@@ -15,6 +15,7 @@
  */
 
 goog.provide('sm.TimingFunction');
+goog.provide('sm.TimingFunction.Evaluator');
 
 
 
@@ -39,6 +40,7 @@ sm.TimingFunction = function(value) {
 /**
  * cubic-bezier(0.25, 0.1, 0.25, 1.0)
  * @const
+ * @type {!sm.TimingFunction}
  */
 sm.TimingFunction.EASE = new sm.TimingFunction('ease');
 
@@ -46,6 +48,7 @@ sm.TimingFunction.EASE = new sm.TimingFunction('ease');
 /**
  * cubic-bezier(0.0, 0.0, 1.0, 1.0)
  * @const
+ * @type {!sm.TimingFunction}
  */
 sm.TimingFunction.LINEAR = new sm.TimingFunction('linear');
 
@@ -53,6 +56,7 @@ sm.TimingFunction.LINEAR = new sm.TimingFunction('linear');
 /**
  * cubic-bezier(0.42, 0.0, 1.0, 1.0)
  * @const
+ * @type {!sm.TimingFunction}
  */
 sm.TimingFunction.EASE_IN = new sm.TimingFunction('ease-in');
 
@@ -60,6 +64,7 @@ sm.TimingFunction.EASE_IN = new sm.TimingFunction('ease-in');
 /**
  * cubic-bezier(0.0, 0.0, 0.58, 1.0)
  * @const
+ * @type {!sm.TimingFunction}
  */
 sm.TimingFunction.EASE_OUT = new sm.TimingFunction('ease-out');
 
@@ -67,17 +72,26 @@ sm.TimingFunction.EASE_OUT = new sm.TimingFunction('ease-out');
 /**
  * cubic-bezier(0.42, 0.0, 0.58, 1.0)
  * @const
+ * @type {!sm.TimingFunction}
  */
 sm.TimingFunction.EASE_IN_OUT = new sm.TimingFunction('ease-in-out');
 
 
 /**
- * Generate a custom cubic-bezier evaluator.
+ * A timing function evaluator that takes an input alpha, an optional epsilon,
+ * and returns the modified alpha.
+ * @typedef {function(number, number=): number}
+ */
+sm.TimingFunction.Evaluator;
+
+
+/**
+ * Generates a custom cubic-bezier evaluator.
  * @param {number} p1x Control point 1 X.
  * @param {number} p1y Control point 1 Y.
  * @param {number} p2x Control point 2 X.
  * @param {number} p2y Control point 2 Y.
- * @return {function(number, number=): number} Timing function evaluator.
+ * @return {!sm.TimingFunction.Evaluator} Timing function evaluator.
  */
 sm.TimingFunction.generateCubicBezier = function(p1x, p1y, p2x, p2y) {
   // From WebKit's UnitBezier.h
@@ -139,16 +153,17 @@ sm.TimingFunction.generateCubicBezier = function(p1x, p1y, p2x, p2y) {
 
 /**
  * A cache of evaluator functions.
+ * The map contains evaluators keyed on their value.
  * @private
- * @type {Object.<string, function(number, number=): number>}
+ * @type {!Object.<!sm.TimingFunction.Evaluator>}
  */
 sm.TimingFunction.evaluators_ = {};
 
 
 /**
- * Get a cached timing function evaluator function.
- * @param {sm.TimingFunction} timingFunction The timing function to query for.
- * @return {function(number, number): number} An evaluator function for the
+ * Gets a cached timing function evaluator.
+ * @param {!sm.TimingFunction} timingFunction The timing function to query for.
+ * @return {!sm.TimingFunction.Evaluator} An evaluator function for the
  *     given timing function.
  */
 sm.TimingFunction.getEvaluator = function(timingFunction) {

@@ -4,7 +4,7 @@
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- * 
+ *
  *     http://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
@@ -24,6 +24,9 @@ goog.require('sm.runtime.Runtime');
 
 /**
  * Global runtime singleton.
+ * Although it is possible to use separate runtimes in an application, is is
+ * encouraged that the shared global runtime is used instead to provide better
+ * resource sharing and synchronization.
  * @private
  * @type {sm.runtime.Runtime}
  */
@@ -31,12 +34,16 @@ sm.runtime_ = null;
 
 
 /**
- * Setup the global runtime singleton.
+ * Gets the default runtime instance.
+ * @return {!sm.runtime.Runtime} Shared runtime.
  */
-sm.setupRuntime_ = function() {
-  var allowCss = false;
-  var tickHz = 60;
-  sm.runtime_ = new sm.runtime.Runtime(allowCss, tickHz);
+sm.getDefaultRuntime = function() {
+  if (!sm.runtime_) {
+    var allowCss = false;
+    var tickHz = 60;
+    sm.runtime_ = new sm.runtime.Runtime(allowCss, tickHz);
+  }
+  return sm.runtime_;
 };
 
 
@@ -47,7 +54,8 @@ sm.setupRuntime_ = function() {
  * @return {sm.Timeline} A new timeline instance.
  */
 sm.createTimeline = function(name) {
-  var timeline = new sm.Timeline(name);
+  var runtime = sm.runtime_ || sm.setupRuntime_();
+  var timeline = new sm.Timeline(runtime, name);
   return timeline;
 };
 
@@ -59,7 +67,8 @@ sm.createTimeline = function(name) {
  * @return {sm.Timeline} The timeline instance.
  */
 sm.loadTimeline = function(data) {
-  var timeline = sm.Timeline.deserialize(data);
+  var runtime = sm.runtime_ || sm.setupRuntime_();
+  var timeline = sm.Timeline.deserialize(runtime, data);
   return timeline;
 };
 

@@ -4,7 +4,7 @@
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- * 
+ *
  *     http://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
@@ -16,6 +16,7 @@
 
 goog.provide('sm.Keyframe');
 
+goog.require('goog.array');
 goog.require('sm.KeyframeAttribute');
 
 
@@ -37,7 +38,7 @@ sm.Keyframe = function(time) {
   /**
    * All attributes the keyframe targets.
    * @private
-   * @type {Array.<sm.KeyframeAttribute>}
+   * @type {!Array.<!sm.KeyframeAttribute>}
    */
   this.attributes_ = [];
 
@@ -51,7 +52,7 @@ sm.Keyframe = function(time) {
 
 
 /**
- * Get the timeline-relative time the keyframe is at, in seconds.
+ * Gets the timeline-relative time the keyframe is at, in seconds.
  * @return {number} The keyframe time.
  */
 sm.Keyframe.prototype.getTime = function() {
@@ -60,9 +61,9 @@ sm.Keyframe.prototype.getTime = function() {
 
 
 /**
- * Set the timeline-relative time the keyframe is at, in seconds.
+ * Sets the timeline-relative time the keyframe is at, in seconds.
  * @param {number} time Time the keyframe is at, in seconds.
- * @return {sm.Keyframe} The keyframe, for chaining.
+ * @return {!sm.Keyframe} The keyframe, for chaining.
  */
 sm.Keyframe.prototype.setTime = function(time) {
   this.time_ = time;
@@ -72,12 +73,12 @@ sm.Keyframe.prototype.setTime = function(time) {
 
 
 /**
- * Create and add an attribute.
+ * Creates and adds an attribute.
  * @param {string} name Target attribute name.
  * @param {string|number=} opt_value Target attribute value.
  * @param {sm.TimingFunction=} opt_timingFunction Timing function used to
  *     evaluate the keyframe.
- * @return {sm.Keyframe} The keyframe, for chaining.
+ * @return {!sm.Keyframe} The keyframe, for chaining.
  */
 sm.Keyframe.prototype.attribute = function(name, opt_value,
     opt_timingFunction) {
@@ -88,7 +89,7 @@ sm.Keyframe.prototype.attribute = function(name, opt_value,
 
 
 /**
- * Alias for attribute - create an add an attribute.
+ * Alias for attribute - creates and adds an attribute.
  * @param {string} name Target attribute name.
  * @param {string|number=} opt_value Target attribute value.
  * @param {sm.TimingFunction=} opt_timingFunction Timing function used to
@@ -99,9 +100,9 @@ sm.Keyframe.prototype.a = sm.Keyframe.prototype.attribute;
 
 
 /**
- * Add an attribute to the keyframe.
- * @param {sm.KeyframeAttribute} attribute An attribute to add.
- * @return {sm.Keyframe} The keyframe, for chaining.
+ * Adds an attribute to the keyframe.
+ * @param {!sm.KeyframeAttribute} attribute An attribute to add.
+ * @return {!sm.Keyframe} The keyframe, for chaining.
  */
 sm.Keyframe.prototype.addAttribute = function(attribute) {
   this.attributes_.push(attribute);
@@ -111,8 +112,8 @@ sm.Keyframe.prototype.addAttribute = function(attribute) {
 
 
 /**
- * Get the list of attributes in the keyframe.
- * @return {Array.<sm.KeyframeAttribute>} All attributes in the keyframe.
+ * Gets the list of attributes in the keyframe.
+ * @return {!Array.<!sm.KeyframeAttribute>} All attributes in the keyframe.
  *     Do not mutate.
  */
 sm.Keyframe.prototype.getAttributes = function() {
@@ -121,9 +122,9 @@ sm.Keyframe.prototype.getAttributes = function() {
 
 
 /**
- * Remove an attribute from the keyframe.
- * @param {sm.KeyframeAttribute} attribute An attribute to remove.
- * @return {sm.Keyframe} The keyframe, for chaining.
+ * Removes an attribute from the keyframe.
+ * @param {!sm.KeyframeAttribute} attribute An attribute to remove.
+ * @return {!sm.Keyframe} The keyframe, for chaining.
  */
 sm.Keyframe.prototype.removeAttribute = function(attribute) {
   if (goog.array.remove(this.attributes_, attribute)) {
@@ -134,8 +135,8 @@ sm.Keyframe.prototype.removeAttribute = function(attribute) {
 
 
 /**
- * Remove all attributes from the keyframe.
- * @return {sm.Keyframe} The keyframe, for chaining.
+ * Removes all attributes from the keyframe.
+ * @return {!sm.Keyframe} The keyframe, for chaining.
  */
 sm.Keyframe.prototype.removeAllAttributes = function() {
   this.attributes_.length = 0;
@@ -145,37 +146,48 @@ sm.Keyframe.prototype.removeAllAttributes = function() {
 
 
 /**
- * Deserialize a keyframe from a previously-serialized JSON object.
- * @param {Object} data JSON-format serialized keyframe.
- * @return {sm.Keyframe} A new keyframe initialized with the given data.
+ * Deserializes a keyframe from a previously-serialized JSON object.
+ * @param {!Object} data JSON-format serialized keyframe.
+ * @return {!sm.Keyframe} A new keyframe initialized with the given data.
  */
 sm.Keyframe.deserialize = function(data) {
-  var keyframe = new sm.Keyframe(
-      /** @type {number} */(data['time']));
-  /** @type {Array.<Object>} */
-  var dataAttributes = data['attributes'];
-  for (var n = 0; n < dataAttributes.length; n++) {
-    var attribute = sm.KeyframeAttribute.deserialize(dataAttributes[n]);
-    keyframe.addAttribute(attribute);
-  }
+  var time = /** @type {number} */ (data['time']);
+  var keyframe = new sm.Keyframe(time);
+
+  var dataAttributes = /** @type {!Array.<!Object>} */ (data['attributes']);
+  goog.array.forEach(dataAttributes,
+      /**
+       * @param {!Object} dataAttribute Attribute JSON.
+       */
+      function (dataAttribute) {
+        var attribute = sm.KeyframeAttribute.deserialize(dataAttribute);
+        keyframe.addAttribute(attribute);
+      });
+
   return keyframe;
 };
 
 
 /**
- * Serialize the keyframe to a compact and round-trippable JSON object.
- * @return {Object} A JSON-format serialization of the entire keyframe.
+ * Serializes the keyframe to a compact and round-trippable JSON object.
+ * @return {!Object} A JSON-format serialization of the entire keyframe.
  */
 sm.Keyframe.prototype.serialize = function() {
   var data = {
     'time': this.time_,
     'attributes': new Array(this.attributes_.length)
   };
+
   var dataAttributes = data['attributes'];
-  for (var n = 0; n < this.attributes_.length; n++) {
-    var attribute = this.attributes_[n];
-    dataAttributes[n] = attribute.serialize();
-  }
+  goog.array.forEach(this.attributes_,
+      /**
+       * @param {!sm.KeyframeAttribute} attribute Source keyframe attribute.
+       * @param {number} n Index.
+       */
+      function(attribute, n) {
+        dataAttributes[n] = attribute.serialize();
+      });
+
   return data;
 };
 

@@ -4,7 +4,7 @@
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- * 
+ *
  *     http://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
@@ -47,10 +47,9 @@ sm.KeyframeAttribute = function(name, opt_value, opt_timingFunction) {
   /**
    * Timing function used for the attribute animation.
    * @private
-   * @type {sm.TimingFunction}
+   * @type {!sm.TimingFunction}
    */
-  this.timingFunction_ = goog.isDef(opt_timingFunction) ? opt_timingFunction :
-      sm.TimingFunction.EASE;
+  this.timingFunction_ = opt_timingFunction || sm.TimingFunction.EASE;
 
   /**
    * Whether the attribute is dirty and needs re-rendering.
@@ -62,7 +61,7 @@ sm.KeyframeAttribute = function(name, opt_value, opt_timingFunction) {
 
 
 /**
- * Get the target attribute name.
+ * Gets the target attribute name.
  * @return {string} The target attribute name.
  */
 sm.KeyframeAttribute.prototype.getName = function() {
@@ -71,9 +70,9 @@ sm.KeyframeAttribute.prototype.getName = function() {
 
 
 /**
- * Set the target attribute name.
+ * Sets the target attribute name.
  * @param {string} name The target attribute name.
- * @return {sm.KeyframeAttribute} The attribute, for chaining.
+ * @return {!sm.KeyframeAttribute} The attribute, for chaining.
  */
 sm.KeyframeAttribute.prototype.setName = function(name) {
   this.name_ = name;
@@ -83,8 +82,8 @@ sm.KeyframeAttribute.prototype.setName = function(name) {
 
 
 /**
- * Get the target attribute value.
- * @return {string|number|undefined} The target attribute value.
+ * Gets the target attribute value.
+ * @return {!string|number|undefined} The target attribute value.
  */
 sm.KeyframeAttribute.prototype.getValue = function() {
   return this.value_;
@@ -92,9 +91,9 @@ sm.KeyframeAttribute.prototype.getValue = function() {
 
 
 /**
- * Set the target attribute value.
+ * Sets the target attribute value.
  * @param {string|number|undefined} value The target attribute value.
- * @return {sm.KeyframeAttribute} The attribute, for chaining.
+ * @return {!sm.KeyframeAttribute} The attribute, for chaining.
  */
 sm.KeyframeAttribute.prototype.setValue = function(value) {
   this.value_ = value;
@@ -104,8 +103,8 @@ sm.KeyframeAttribute.prototype.setValue = function(value) {
 
 
 /**
- * Get the timing function used to evaluate the keyframe.
- * @return {sm.TimingFunction} The timing function.
+ * Gets the timing function used to evaluate the keyframe.
+ * @return {!sm.TimingFunction} The timing function.
  */
 sm.KeyframeAttribute.prototype.getTimingFunction = function() {
   return this.timingFunction_;
@@ -113,9 +112,9 @@ sm.KeyframeAttribute.prototype.getTimingFunction = function() {
 
 
 /**
- * Set the timing function used to evaluate the keyframe.
- * @param {sm.TimingFunction} timingFunction The timing function.
- * @return {sm.KeyframeAttribute} The attribute, for chaining.
+ * Sets the timing function used to evaluate the keyframe.
+ * @param {!sm.TimingFunction} timingFunction The timing function.
+ * @return {!sm.KeyframeAttribute} The attribute, for chaining.
  */
 sm.KeyframeAttribute.prototype.setTimingFunction = function(timingFunction) {
   this.timingFunction_ = timingFunction;
@@ -125,24 +124,24 @@ sm.KeyframeAttribute.prototype.setTimingFunction = function(timingFunction) {
 
 
 /**
- * Deserialize an attribute from a previously-serialized JSON object.
- * @param {Object} data JSON-format serialized attribute.
- * @return {sm.KeyframeAttribute} A new attribute initialized with the given
+ * Deserializes an attribute from a previously-serialized JSON object.
+ * @param {!Object} data JSON-format serialized attribute.
+ * @return {!sm.KeyframeAttribute} A new attribute initialized with the given
  *     data.
  */
 sm.KeyframeAttribute.deserialize = function(data) {
-  var attribute = new sm.KeyframeAttribute(
-      /** @type {string} */(data['name']),
-      /** @type {string|number|undefined} */(data['value']),
-      new sm.TimingFunction(
-          /** @type {!string|!Array.<number>} */(data['timingFunction'])));
+  var name = /** @type {string} */ (data['name']);
+  var value = /** @type {string|number|undefined} */ (data['value']);
+  var timingFunction = new sm.TimingFunction(
+      /** @type {string|!Array.<number>} */ (data['timingFunction']));
+  var attribute = new sm.KeyframeAttribute(name, value, timingFunction);
   return attribute;
 };
 
 
 /**
- * Serialize the attribute to a compact and round-trippable JSON object.
- * @return {Object} A JSON-format serialization of the entire attribute.
+ * Serializes the attribute to a compact and round-trippable JSON object.
+ * @return {!Object} A JSON-format serialization of the entire attribute.
  */
 sm.KeyframeAttribute.prototype.serialize = function() {
   var data = {
@@ -152,4 +151,3 @@ sm.KeyframeAttribute.prototype.serialize = function() {
   };
   return data;
 };
-

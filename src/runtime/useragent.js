@@ -4,7 +4,7 @@
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- * 
+ *
  *     http://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
@@ -16,6 +16,7 @@
 
 goog.provide('sm.runtime.UserAgent');
 
+goog.require('goog.array');
 goog.require('goog.userAgent');
 
 
@@ -65,31 +66,34 @@ sm.runtime.UserAgent = function() {
 /**
  * Common browser CSS prefixes.
  * @private
+ * @const
+ * @type {!Array.<string>}
  */
 sm.runtime.UserAgent.prefixes_ = ['Webkit', 'Moz', 'O', 'ms'];
 
 
 /**
- * Attempt to determine the browser prefix for the given feature set.
+ * Guesses the browser prefix for the given feature set.
  * @private
  * @param {string} name A CSS name to test against.
- * @return {?string} Browser prefix/empty string or null if none found.
+ * @return {?string} Browser prefix/empty string if found.
  */
 sm.runtime.UserAgent.prototype.guessPrefix_ = function(name) {
-  var bodyStyle = document.body.style;
-  var prefixes = sm.runtime.UserAgent.prefixes_;
-  for (var n = 0; n < prefixes.length; n++) {
-    var guessName = this.addPrefix_(prefixes[n], name);
-    if (goog.isDef(bodyStyle[guessName])) {
-      return prefixes[n];
-    }
-  }
-  return null;
+  return /** @type {?string} */ (goog.array.find(
+      sm.runtime.UserAgent.prefixes_,
+      /**
+       * @param {string} prefix Browser prefix.
+       * @return {boolean} Whether the prefix matches.
+       */
+      function(prefix) {
+        var guessName = this.addPrefix_(prefix, name);
+        return goog.isDef(document.body.style[guessName]);
+      }, this));
 };
 
 
 /**
- * Add the given user agent prefix to the given CSS name.
+ * Adds the given user agent prefix to the given CSS name.
  * @param {string} prefix User agent prefix.
  * @param {string} name Base CSS name.
  * @return {string} CSS name with browser prefix added.
