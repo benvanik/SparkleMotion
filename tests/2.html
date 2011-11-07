@@ -32,7 +32,7 @@
     <script>
       var sequences = [];
       (function() {
-        var ts = {"name":"move-down","animations":[{"target":"box.style","repeat":false,"alternate":false,"keyframes":[{"time":0,"attributes":[{"name":"top","value":"0px","timingFunction":"ease"},{"name":"opacity","value":0.3,"timingFunction":"ease"}]},{"time":0.5,"attributes":[{"name":"top","value":"50px","timingFunction":"ease"},{"name":"opacity","value":1,"timingFunction":"ease"}]},{"time":1,"attributes":[{"name":"top","value":"160px","timingFunction":"ease"}]}]}]};
+        var ts = {"n":"move-down","animations":[{"target":"box.style","repeat":false,"alternate":false,"keyframes":[{"t":0,"a":[{"n":"top","v":"0px","f":"ease"},{"n":"opacity","v":0.3,"f":"ease"}]},{"t":0.5,"a":[{"n":"top","v":"50px","f":"ease"},{"n":"opacity","v":1,"f":"ease"}]},{"t":1,"a":[{"n":"top","v":"160px","f":"ease"}]}]}]};
         var t = SM.loadTimeline(ts);
 
         sequences.push(SM.sequenceTimeline(t, {

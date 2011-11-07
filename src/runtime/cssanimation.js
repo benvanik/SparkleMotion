@@ -4,7 +4,7 @@
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- * 
+ *
  *     http://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
@@ -16,6 +16,7 @@
 
 goog.provide('sm.runtime.CssAnimation');
 
+goog.require('goog.asserts');
 goog.require('goog.object');
 
 
@@ -24,34 +25,63 @@ goog.require('goog.object');
  * CSS Animations individual animation state.
  *
  * @constructor
- * @param {HTMLElement} element Target element.
+ * @param {!sm.runtime.UserAgent} userAgent User-agent utility.
+ * @param {!HTMLElement} element Target element.
  * @param {number} delay Delay, in seconds, from timeline start.
  * @param {number} duration Duration, in seconds, of entire timeline.
  * @param {string} timingFunction CSS timing function.
  */
-sm.runtime.CssAnimation = function(element, delay, duration, timingFunction) {
-  /** @type {HTMLElement} */
+sm.runtime.CssAnimation = function(
+    userAgent, element, delay, duration, timingFunction) {
+  goog.asserts.assert(element.style);
+
+  /**
+   * Shared user agent utility.
+   * @private
+   * @type {!sm.runtime.UserAgent}
+   */
+  this.userAgent_ = userAgent;
+
+  /**
+   * @type {!HTMLElement}
+   */
   this.element = element;
-  /** @type {CSSStyleDeclaration} */
+
+  /**
+   * @type {!CSSStyleDeclaration}
+   */
   this.style = element.style;
-  /** @type {string} */
+
+  /**
+   * @type {string}
+   */
   this.name = '';
-  /** @type {number} */
+
+  /**
+   * @type {number}
+   */
   this.delay = delay;
-  /** @type {number} */
+
+  /**
+   * @type {number}
+   */
   this.duration = duration;
-  /** @type {string} */
+
+  /**
+   * @type {string}
+   */
   this.timingFunction = timingFunction;
 
   /**
-   * @type {Object.<string, Array.<{name: string, value}>>}
+   * @type {!Object.<!Array.<{name: string, value}>>}
    */
   this.keyframeAttributes = {};
 
   /**
-   * @type {Object.<string, *>}
+   * @type {!Object.<*>}
    */
   this.finalAttributes = {};
+
   /**
    * @type {string}
    */
@@ -60,7 +90,7 @@ sm.runtime.CssAnimation = function(element, delay, duration, timingFunction) {
 
 
 /**
- * Add an attribute keyframe.
+ * Adds an attribute keyframe.
  * @param {number} percent Percent through the timeline this keyframe occurs.
  * @param {string} name Attribute name.
  * @param {string|number} value Attribute value at the keyframe.
@@ -108,13 +138,13 @@ sm.runtime.CssAnimation.prototype.finalize = function() {
 
 
 /**
- * Clear the style for this specific animation.
+ * Clears the style for this specific animation.
  * @param {boolean} end Go to the end of the animation.
  */
 sm.runtime.CssAnimation.prototype.clearStyle = function(end) {
   var finalAttributes = this.finalAttributes;
   if (!end) {
-    finalAttributes = window.getComputedStyle(this.el, null);
+    finalAttributes = window.getComputedStyle(this.element, null);
   }
   goog.object.forEach(this.keyframeAttributes, function(attributes, key) {
     for (var n = 0; n < attributes.length; n++) {
@@ -124,7 +154,7 @@ sm.runtime.CssAnimation.prototype.clearStyle = function(end) {
   }, this);
 
   // TODO: remove just self
-  var agent = sm.runtime.cssAgent_;
+  var agent = this.userAgent_;
   this.style[agent.animationName] = '';
   this.style[agent.animationDelay] = '';
   this.style[agent.animationDuration] = '';
@@ -134,7 +164,7 @@ sm.runtime.CssAnimation.prototype.clearStyle = function(end) {
 
 
 /**
- * Set the style to kickoff the animation.
+ * Sets the style to kickoff the animation.
  */
 sm.runtime.CssAnimation.prototype.setStyle = function() {
   // Set final state
@@ -143,7 +173,7 @@ sm.runtime.CssAnimation.prototype.setStyle = function() {
   }, this);
 
   // TODO: append
-  var agent = sm.runtime.cssAgent_;
+  var agent = this.userAgent_;
   this.style[agent.animationName] = this.name;
   this.style[agent.animationDelay] = this.delay + 's';
   this.style[agent.animationDuration] = this.duration + 's';

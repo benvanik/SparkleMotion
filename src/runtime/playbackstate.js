@@ -108,7 +108,7 @@ sm.runtime.PlaybackState = function(userAgent, timeline, scope, allowCss) {
   /**
    * Callback for when playback completes.
    * @private
-   * @type {function(): void}
+   * @type {?function(): void}
    */
   this.callback_ = null;
 
@@ -336,8 +336,8 @@ sm.runtime.PlaybackState.prototype.addJavascriptAnimation_ =
 /**
  * Adds an animation using CSS Animations.
  * @private
- * @param {sm.Animation} animation The animation to add.
- * @param {HTMLElement} element Element being animated.
+ * @param {!sm.Animation} animation The animation to add.
+ * @param {!HTMLElement} element Element being animated.
  * @return {string} A CSS fragment to add to the style sheet or an empty string.
  */
 sm.runtime.PlaybackState.prototype.addCssAnimation_ =
@@ -370,7 +370,7 @@ sm.runtime.PlaybackState.prototype.start = function(playToken, opt_callback) {
     var self = this;
     window.setTimeout(function() {
       if (self.playToken_ === playToken) {
-        self.ended_();
+        self.ended();
       }
     }, this.duration * 1000);
 
@@ -421,7 +421,7 @@ sm.runtime.PlaybackState.prototype.tick = function(time) {
   if (!anyUpdating && firstIndex < this.tweens_.length) {
     if (!this.anyCssAnimationsRunning_) {
       // Done
-      this.ended_();
+      this.ended();
     }
   }
 
@@ -431,9 +431,8 @@ sm.runtime.PlaybackState.prototype.tick = function(time) {
 
 /**
  * Handles end logic.
- * @private
  */
-sm.runtime.PlaybackState.prototype.ended_ = function() {
+sm.runtime.PlaybackState.prototype.ended = function() {
   var callback = this.callback_;
   this.playing = false;
   this.playToken_ = 0;
