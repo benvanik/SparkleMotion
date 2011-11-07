@@ -25,7 +25,7 @@ goog.require('sm.runtime.Tween');
  *
  * @extends {sm.runtime.Tween}
  * @constructor
- * @param {Object} target Target object.
+ * @param {!Object} target Target object.
  * @param {string} key Property key on the target object.
  * @param {?function(Object, *): void} setter Property value setter.
  * @param {number} startTime Timeline-relative time to start tweening, in ms.

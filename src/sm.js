@@ -16,6 +16,7 @@
 
 goog.provide('sm');
 
+goog.require('goog.dom');
 goog.require('sm.Scope');
 goog.require('sm.Sequence');
 goog.require('sm.Timeline');
@@ -30,7 +31,7 @@ goog.require('sm.runtime.Runtime');
  * @private
  * @type {sm.runtime.Runtime}
  */
-sm.runtime_ = null;
+sm.runtime_;
 
 
 /**
@@ -48,15 +49,33 @@ sm.getDefaultRuntime = function() {
 
 
 /**
+ * Global browser scope singleton.
+ * @private
+ * @type {sm.Scope}
+ */
+sm.browserScope_;
+
+
+/**
+ * Gets the default browser scope instance.
+ * @return {!sm.Scope}
+ */
+sm.getBrowserScope = function() {
+  if (!sm.browserScope_) {
+    sm.browserScope_ = new sm.Scope(goog.dom.getDomHelper());
+  }
+  return sm.browserScope_;
+};
+
+
+/**
  * Creates a new timeline. Optionally use the given map for
  * all target lookups (otherwise, document.getElementById will be used).
  * @param {string} name Unique timeline name.
  * @return {!sm.Timeline} A new timeline instance.
  */
 sm.createTimeline = function(name) {
-  var runtime = sm.runtime_ || sm.setupRuntime_();
-  var timeline = new sm.Timeline(runtime, name);
-  return timeline;
+  return new sm.Timeline(name);
 };
 
 
@@ -67,25 +86,27 @@ sm.createTimeline = function(name) {
  * @return {!sm.Timeline} The timeline instance.
  */
 sm.loadTimeline = function(data) {
-  var runtime = sm.runtime_ || sm.setupRuntime_();
-  var timeline = sm.Timeline.deserialize(runtime, data);
-  return timeline;
+  return sm.Timeline.deserialize(data);
 };
 
 
 /**
  * Sets up a playback sequence.
  * @param {!sm.Timeline} timeline Timeline to start playing.
- * @param {!Object.<!Object>=} opt_scope Target lookup map.
+ * @param {Object.<!Object>|sm.Scope=} opt_scope Target lookup scope.
  * @return {!sm.Sequence} A new playback sequence.
  */
 sm.sequenceTimeline = function(timeline, opt_scope) {
-  if (!sm.runtime_) {
-    sm.setupRuntime_();
+  var runtime = sm.getDefaultRuntime();
+
+  var scope = sm.getBrowserScope();
+  if (opt_scope) {
+    if (opt_scope instanceof sm.Scope) {
+      scope = opt_scope;
+    } else {
+      scope = new sm.Scope(null, opt_scope);
+    }
   }
 
-  var scope = goog.isDef(opt_scope) ? new sm.Scope(false, opt_scope) :
-      sm.Scope.browserScope;
-  var sequence = new sm.Sequence(sm.runtime_, timeline, scope);
-  return sequence;
+  return new sm.Sequence(runtime, timeline, scope);
 };
