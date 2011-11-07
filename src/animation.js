@@ -131,6 +131,24 @@ sm.Animation.prototype.getKeyframes = function() {
 
 
 /**
+ * Gets the total duration of the animation.
+ * @return {number} Total duration, in ms.
+ */
+sm.Animation.prototype.getDuration = function() {
+  var totalDuration = 0;
+  goog.array.forEach(this.keyframes_,
+      /**
+       * @param {!sm.Keyframe} keyframe Keyframe.
+       */
+      function (keyframe) {
+        var time = keyframe.getTime();
+        totalDuration = Math.max(totalDuration, time);
+      });
+  return totalDuration;
+};
+
+
+/**
  * Removes a keyframe from the animation.
  * @param {!sm.Keyframe} keyframe A keyframe to remove.
  * @return {!sm.Animation} The animation, for chaining.

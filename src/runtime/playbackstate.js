@@ -25,6 +25,7 @@
 
 goog.provide('sm.runtime.PlaybackState');
 
+goog.require('goog.array');
 goog.require('goog.asserts');
 goog.require('goog.cssom');
 goog.require('goog.string');
@@ -49,25 +50,27 @@ goog.require('sm.runtime.UserAgent');
  *   - Mixed - ends when the last tween and the last animation ends
  *
  * @constructor
- * @param {sm.runtime.UserAgent} userAgent User-agent utility.
- * @param {sm.Timeline} timeline Timeline for this playback sequence.
- * @param {sm.Scope} scope The target scope for the timeline.
+ * @param {!sm.runtime.UserAgent} userAgent User-agent utility.
+ * @param {!sm.Timeline} timeline Timeline for this playback sequence.
+ * @param {!sm.Scope} scope The target scope for the timeline.
  * @param {boolean} allowCss Whether to enable CSS Animations.
  */
 sm.runtime.PlaybackState = function(userAgent, timeline, scope, allowCss) {
   /**
    * Shared user agent utility.
-   * @type {sm.runtime.UserAgent}
+   * @type {!sm.runtime.UserAgent}
    */
   this.userAgent = userAgent;
+
   /**
    * Timeline being played.
-   * @type {sm.Timeline}
+   * @type {!sm.Timeline}
    */
   this.timeline = timeline;
+
   /**
    * Scope for timeline lookups.
-   * @type {sm.Scope}
+   * @type {!sm.Scope}
    */
   this.scope = scope;
 
@@ -75,6 +78,7 @@ sm.runtime.PlaybackState = function(userAgent, timeline, scope, allowCss) {
    * Total duration of the timeline, in seconds.
    */
   this.duration = 0;
+
   /**
    * Whether the state needs to be ticked.
    * @type {boolean}
@@ -86,19 +90,25 @@ sm.runtime.PlaybackState = function(userAgent, timeline, scope, allowCss) {
    * @type {boolean}
    */
   this.playing = false;
+
   /**
    * Unique play token for the given playback.
+   * @private
    * @type {number}
    */
   this.playToken_ = 0;
+
   /**
    * Time the playback was started.
+   * @private
    * @type {number}
    */
   this.startTime_ = 0;
+
   /**
    * Callback for when playback completes.
-   * @type {?function(): void}
+   * @private
+   * @type {function(): void}
    */
   this.callback_ = null;
 
@@ -107,9 +117,10 @@ sm.runtime.PlaybackState = function(userAgent, timeline, scope, allowCss) {
   /**
    * All tweens to run in Javascript.
    * @private
-   * @type {Array.<sm.runtime.Tween>}
+   * @type {!Array.<!sm.runtime.Tween>}
    */
   this.tweens_ = [];
+
   /**
    * Starting index in the tween list when iterating the list.
    * @private
@@ -122,11 +133,12 @@ sm.runtime.PlaybackState = function(userAgent, timeline, scope, allowCss) {
   /**
    * All CSS Animations to run.
    * @private
-   * @type {Array.<sm.runtime.CssAnimation>}
+   * @type {!Array.<!sm.runtime.CssAnimation>}
    */
   this.cssAnimations_ = [];
+
   /**
-   * Whether or not any CSS Animations are running.
+   * Whether any CSS Animations are running.
    * @private
    * @type {boolean}
    */
@@ -138,10 +150,10 @@ sm.runtime.PlaybackState = function(userAgent, timeline, scope, allowCss) {
 
 
 /**
- * Sort routine to order Tweens by starting time.
+ * Sorts routine to order Tweens by starting time.
  * @private
- * @param {sm.runtime.Tween} a Tween A.
- * @param {sm.runtime.Tween} b Tween B.
+ * @param {!sm.runtime.Tween} a Tween A.
+ * @param {!sm.runtime.Tween} b Tween B.
  * @return {number} Sort result
  */
 sm.runtime.PlaybackState.tweenSort_ = function(a, b) {
@@ -150,58 +162,47 @@ sm.runtime.PlaybackState.tweenSort_ = function(a, b) {
 
 
 /**
- * Construct the tweens/animations for the given timeline.
+ * Constructs the tweens/animations for the given timeline.
  * @private
  * @param {boolean} allowCss Whether to enable CSS Animations.
  */
 sm.runtime.PlaybackState.prototype.construct_ = function(allowCss) {
-  var animations = this.timeline.getAnimations();
-
-  // Calculate total timeline duration
-  /** @type {number} */
   var totalDuration = 0;
-  for (var n = 0; n < animations.length; n++) {
-    var animation = animations[n];
-    var keyframes = animation.getKeyframes();
-    for (var m = 0; m < keyframes.length; m++) {
-      var keyframe = keyframes[m];
-      var time = keyframe.getTime();
-      totalDuration = Math.max(totalDuration, time);
-    }
-  }
-  this.duration = totalDuration;
-
-  // Generate appropriate animation type
   var styleSheet = '';
-  for (var n = 0; n < animations.length; n++) {
-    var animation = animations[n];
 
-    // Resolve target
-    var targetSpec = animation.getTarget();
-    var target = this.scope.get(targetSpec);
-    var useCssAnimations = false;
-    if (target instanceof CSSStyleDeclaration) {
-      useCssAnimations = allowCss;
+  var animations = this.timeline.getAnimations();
+  goog.array.forEach(animations,
+      /**
+       * @param {!sm.Animation} animation Animation.
+       */
+      function (animation) {
+        // Compute total duration
+        totalDuration = Math.max(totalDuration, animation.getDuration());
 
-    }
+        // Resolve target
+        var targetSpec = animation.getTarget();
+        var target = this.scope.get(targetSpec);
+        var useCssAnimations = false;
+        if (target instanceof CSSStyleDeclaration) {
+          useCssAnimations = allowCss;
+        }
 
-    // If CSS, we also need the element (for getComputedStyle)
-    /** @type {?HTMLElement} */
-    var targetElement = null;
-    if (useCssAnimations) {
-      goog.asserts.assert(goog.string.endsWith(targetSpec, '.style'));
-      var elementSpec = targetSpec.substr(0, targetSpec.length - 6);
-      targetElement = /** @type {HTMLElement} */(this.scope.get(elementSpec));
-      goog.asserts.assert(targetElement);
-    }
+        // If CSS, we also need the element (for getComputedStyle)
+        if (useCssAnimations) {
+          goog.asserts.assert(goog.string.endsWith(targetSpec, '.style'));
+          var elementSpec = targetSpec.substr(0, targetSpec.length - 6);
+          var targetElement = /** @type {HTMLElement} */ (
+              this.scope.get(elementSpec));
+          goog.asserts.assert(targetElement);
 
-    // Add the animation
-    if (useCssAnimations) {
-      styleSheet += this.addCssAnimation_(animation, targetElement);
-    } else {
-      this.addJavascriptAnimation_(animation, target);
-    }
-  }
+          // Append to stylesheet
+          styleSheet += this.addCssAnimation_(animation, targetElement);
+        } else {
+          // Add javascript animation
+          this.addJavascriptAnimation_(animation, target);
+        }
+      }, this);
+  this.duration = totalDuration;
 
   // Javascript post-processing
   if (this.tweens_.length) {
@@ -226,12 +227,12 @@ sm.runtime.PlaybackState.prototype.construct_ = function(allowCss) {
 /**
  * Add an animation using Javascript tweens.
  * @private
- * @param {sm.Animation} animation The animation to add.
- * @param {Object} target Object being animated.
+ * @param {!sm.Animation} animation The animation to add.
+ * @param {!Object} target Object being animated.
  */
 sm.runtime.PlaybackState.prototype.addJavascriptAnimation_ =
     function(animation, target) {
-  /** @type {Object.<string, string|number>} */
+  /** @type {!Object.<string|number>} */
   var attributeValues = {};
 
   var keyframes = animation.getKeyframes();
@@ -315,9 +316,9 @@ sm.runtime.PlaybackState.prototype.addJavascriptAnimation_ =
             target, key, setter,
             startTime, duration, timingFunction,
             from, to, unit);
-      } else if (isColor) {
+      //} else if (isColor) {
         // TODO: ColorTween
-      } else if (isTransform) {
+      //} else if (isTransform) {
         // TODO: TransformTween
       }
 
@@ -333,7 +334,7 @@ sm.runtime.PlaybackState.prototype.addJavascriptAnimation_ =
 
 
 /**
- * Add an animation using CSS Animations.
+ * Adds an animation using CSS Animations.
  * @private
  * @param {sm.Animation} animation The animation to add.
  * @param {HTMLElement} element Element being animated.
@@ -347,7 +348,7 @@ sm.runtime.PlaybackState.prototype.addCssAnimation_ =
 
 
 /**
- * Start playback.
+ * Starts playback.
  * @param {number} playToken Unique playback token.
  * @param {function(): void|undefined} opt_callback Function to call when
  *     completed.
@@ -369,22 +370,21 @@ sm.runtime.PlaybackState.prototype.start = function(playToken, opt_callback) {
     var self = this;
     window.setTimeout(function() {
       if (self.playToken_ === playToken) {
-        self.ended();
+        self.ended_();
       }
     }, this.duration * 1000);
 
     // Set all initial state/clear current animations
-    for (var n = 0; n < this.cssAnimations_.length; n++) {
-      var animation = this.cssAnimations_[n];
+    goog.array.forEach(this.cssAnimations_, function(animation) {
       animation.clearStyle(false);
-    }
+    });
 
     // After 1 browser tick, set all animations
     // This is required because one cannot clearStyle and setStyle in the same
     // pass as the browser will coalesce style updates
     window.setTimeout(function() {
-      goog.array.forEach(self.cssAnimations_, function(value) {
-        value.setStyle();
+      goog.array.forEach(self.cssAnimations_, function(animation) {
+        animation.setStyle();
       });
     }, 0);
   } else {
@@ -394,7 +394,7 @@ sm.runtime.PlaybackState.prototype.start = function(playToken, opt_callback) {
 
 
 /**
- * Called once per tick, if needsTick is true.
+ * Handles tick logic, if needsTick is true.
  * @param {number} time The current time.
  * @return {boolean} True if the state is still ticking.
  */
@@ -421,7 +421,7 @@ sm.runtime.PlaybackState.prototype.tick = function(time) {
   if (!anyUpdating && firstIndex < this.tweens_.length) {
     if (!this.anyCssAnimationsRunning_) {
       // Done
-      this.ended();
+      this.ended_();
     }
   }
 
@@ -430,9 +430,10 @@ sm.runtime.PlaybackState.prototype.tick = function(time) {
 
 
 /**
- * Called when the state has ended playback.
+ * Handles end logic.
+ * @private
  */
-sm.runtime.PlaybackState.prototype.ended = function() {
+sm.runtime.PlaybackState.prototype.ended_ = function() {
   var callback = this.callback_;
   this.playing = false;
   this.playToken_ = 0;
@@ -445,13 +446,15 @@ sm.runtime.PlaybackState.prototype.ended = function() {
   // CSS:
   this.anyCssAnimationsRunning_ = false;
   if (this.cssAnimations_.length) {
-    goog.array.forEach(this.cssAnimations_, function(value) {
-      value.clearStyle(false);
+    goog.array.forEach(this.cssAnimations_, function(animation) {
+      animation.clearStyle(false);
     });
   }
 
   if (callback) {
     callback();
   }
+
+  // TODO(benvanik): repeat?
 };
 
