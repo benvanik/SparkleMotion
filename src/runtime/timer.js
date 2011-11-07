@@ -4,7 +4,7 @@
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- * 
+ *
  *     http://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
@@ -22,45 +22,51 @@ goog.require('sm.runtime.UserAgent');
 
 /**
  * A generic update timer.
- * The timer will use setInterval unless the browser supports 
+ * The timer will use setInterval unless the browser supports
  * requestAnimationFrame.
  *
  * @constructor
- * @param {sm.runtime.UserAgent} userAgent User-Agent utility.
+ * @param {!sm.runtime.UserAgent} userAgent User-Agent utility.
  * @param {number} tickHz Desired ticks/second.
  */
 sm.runtime.Timer = function(userAgent, tickHz) {
   /**
+   * User-Agent utility.
    * @private
-   * @type {sm.runtime.UserAgent}
+   * @type {!sm.runtime.UserAgent}
    */
   this.userAgent_ = userAgent;
 
   /**
+   * Desired ticks/second.
    * @private
    * @type {number}
    */
   this.tickHz_ = tickHz;
 
   /**
+   * Whether the timer is currently running.
    * @private
    * @type {boolean}
    */
   this.running_ = false;
 
   /**
+   * Browser interval ID, if using setInterval.
    * @private
    * @type {?number}
    */
   this.intervalId_ = null;
 
   /**
+   * All attached callbacks.
    * @private
-   * @type {Array.<function(number): boolean>}
+   * @type {!Array.<function(number): boolean>}
    */
   this.callbacks_ = [];
 
   /**
+   * The instance tick function, bound to call with this as the owning instance.
    * @private
    * @type {function(number=): void}
    */
@@ -69,7 +75,7 @@ sm.runtime.Timer = function(userAgent, tickHz) {
 
 
 /**
- * Add an update callback and potentially start the timer.
+ * Adds an update callback and potentially starts the timer.
  * The callback should return true if it needs to be called back again.
  *
  * @param {function(number): boolean} callback Function to be called each tick.
@@ -80,11 +86,11 @@ sm.runtime.Timer.prototype.addCallback = function(callback, opt_this) {
     callback = goog.bind(callback, opt_this);
   }
   this.callbacks_.push(callback);
-}
+};
 
 
 /**
- * Start timer, if required.
+ * Starts the timer, if required.
  */
 sm.runtime.Timer.prototype.start = function() {
   if (this.running_) {
@@ -100,7 +106,7 @@ sm.runtime.Timer.prototype.start = function() {
 
 
 /**
- * Stop timer, if required.
+ * Stops the timer, if required.
  */
 sm.runtime.Timer.prototype.stop = function() {
   if (!this.running_) {
@@ -117,7 +123,7 @@ sm.runtime.Timer.prototype.stop = function() {
 
 
 /**
- * Tick handler to dispatch all callbacks.
+ * Handles tick dispatches all callbacks.
  * @private
  * @param {number=} opt_time Current time, if the underlying timer gives it.
  */

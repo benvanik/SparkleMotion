@@ -151,10 +151,10 @@ sm.Keyframe.prototype.removeAllAttributes = function() {
  * @return {!sm.Keyframe} A new keyframe initialized with the given data.
  */
 sm.Keyframe.deserialize = function(data) {
-  var time = /** @type {number} */ (data['time']);
+  var time = /** @type {number} */ (data['t']);
   var keyframe = new sm.Keyframe(time);
 
-  var dataAttributes = /** @type {!Array.<!Object>} */ (data['attributes']);
+  var dataAttributes = /** @type {!Array.<!Object>} */ (data['a']);
   goog.array.forEach(dataAttributes,
       /**
        * @param {!Object} dataAttribute Attribute JSON.
@@ -174,11 +174,11 @@ sm.Keyframe.deserialize = function(data) {
  */
 sm.Keyframe.prototype.serialize = function() {
   var data = {
-    'time': this.time_,
-    'attributes': new Array(this.attributes_.length)
+    't': this.time_,
+    'a': new Array(this.attributes_.length)
   };
 
-  var dataAttributes = data['attributes'];
+  var dataAttributes = data['a'];
   goog.array.forEach(this.attributes_,
       /**
        * @param {!sm.KeyframeAttribute} attribute Source keyframe attribute.

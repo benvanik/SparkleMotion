@@ -45,13 +45,6 @@ sm.Animation = function(target, opt_repeat, opt_alternate) {
   this.repeat_ = opt_repeat || false;
 
   /**
-   * Whether to alternate direction on repeats.
-   * @private
-   * @type {boolean}
-   */
-  this.alternate_ = opt_alternate || false;
-
-  /**
    * All keyframes in the animation.
    * @private
    * @type {!Array.<!sm.Keyframe>}
@@ -92,28 +85,6 @@ sm.Animation.prototype.getRepeat = function() {
  */
 sm.Animation.prototype.setRepeat = function(repeat) {
   this.repeat_ = repeat;
-  this.dirty_ = true;
-  return this;
-};
-
-
-/**
- * Gets the flag indicating whether the animation should alternate direction on
- * repeat.
- * @return {boolean} Whether or not the animation should alternate on repeat.
- */
-sm.Animation.prototype.getAlternate = function() {
-  return this.alternate_;
-};
-
-
-/**
- * Sets the repeat alternate direction flag.
- * @param {boolean} alternate Whether to alternate direction on repeats.
- * @return {!sm.Animation} The animation, for chaining.
- */
-sm.Animation.prototype.setAlternate = function(alternate) {
-  this.alternate_ = alternate;
   this.dirty_ = true;
   return this;
 };
@@ -191,8 +162,7 @@ sm.Animation.prototype.removeAllKeyframes = function() {
 sm.Animation.deserialize = function(data) {
   var target = /** @type {string} */ (data['target']);
   var repeat = /** @type {boolean|undefined} */ (data['repeat']);
-  var alternate = /** @type {boolean|undefined} */ (data['alternate']);
-  var animation = new sm.Animation(target, repeat, alternate);
+  var animation = new sm.Animation(target, repeat);
 
   var dataKeyframes = /** @type {!Array.<!Object>} */ (data['keyframes']);
   goog.array.forEach(dataKeyframes,
@@ -216,7 +186,6 @@ sm.Animation.prototype.serialize = function() {
   var data = {
     'target': this.target_,
     'repeat': this.repeat_,
-    'alternate': this.alternate_,
     'keyframes': new Array(this.keyframes_.length)
   };
 

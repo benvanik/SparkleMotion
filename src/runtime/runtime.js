@@ -4,7 +4,7 @@
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- * 
+ *
  *     http://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
@@ -32,10 +32,13 @@ goog.require('sm.runtime.UserAgent');
  * @param {number=} opt_tickHz Ticks/second; default 60.
  */
 sm.runtime.Runtime = function(opt_allowCss, opt_tickHz) {
+  var allowCss = goog.isDef(opt_allowCss) ? opt_allowCss : true;
+  var tickHz = goog.isDef(opt_tickHz) ? opt_tickHz : 60;
+
   /**
    * Shared user agent utility instance.
    * @private
-   * @type {sm.runtime.UserAgent}
+   * @type {!sm.runtime.UserAgent}
    */
   this.userAgent_ = new sm.runtime.UserAgent();
 
@@ -44,15 +47,14 @@ sm.runtime.Runtime = function(opt_allowCss, opt_tickHz) {
    * @private
    * @type {boolean}
    */
-  this.allowCss_ = goog.isDef(opt_allowCss) ? opt_allowCss : true;
+  this.allowCss_ = allowCss;
 
   /**
    * Runtime timer.
    * @private
-   * @type {sm.runtime.Timer}
+   * @type {!sm.runtime.Timer}
    */
-  this.timer_ = new sm.runtime.Timer(this.userAgent_,
-      goog.isDef(opt_tickHz) ? opt_tickHz : 60);
+  this.timer_ = new sm.runtime.Timer(this.userAgent_, tickHz);
   this.timer_.addCallback(this.tick_, this);
 
   /**
@@ -65,14 +67,14 @@ sm.runtime.Runtime = function(opt_allowCss, opt_tickHz) {
   /**
    * Active playback states that need ticking.
    * @private
-   * @type {Array.<sm.runtime.PlaybackState>}
+   * @type {!Array.<!sm.runtime.PlaybackState>}
    */
   this.tickableStates_ = [];
 };
 
 
 /**
- * Timer callback for processing Javascript animations.
+ * Handles timer callbacks for processing javascript animations.
  * @private
  */
 sm.runtime.Runtime.prototype.tick_ = function(time) {
@@ -84,28 +86,27 @@ sm.runtime.Runtime.prototype.tick_ = function(time) {
       n--;
     }
   }
-
-  return (this.tickableStates_.length > 0);
+  return this.tickableStates_.length > 0;
 };
 
 
 /**
- * Prepare a timeline for playback.
- * @param {sm.Timeline} timeline Timeline for this playback sequence.
- * @param {sm.Scope} scope The target scope for the timeline.
- * @return {sm.runtime.PlaybackState} Runtime-specific state information.
+ * Prepares a timeline for playback.
+ * @param {!sm.Timeline} timeline Timeline for this playback sequence.
+ * @param {!sm.Scope} scope The target scope for the timeline.
+ * @return {!sm.runtime.PlaybackState} Runtime-specific state information.
  */
 sm.runtime.Runtime.prototype.prepare = function(timeline, scope) {
-  var state = new sm.runtime.PlaybackState(this.userAgent_, timeline, scope,
-      this.allowCss_);
+  var state = new sm.runtime.PlaybackState(
+      this.userAgent_, timeline, scope, this.allowCss_);
   return state;
 };
 
 
 /**
- * Begin playback of a timeline.
- * @param {sm.runtime.PlaybackState} state Runtime-specific state information.
- * @param {function(): void|undefined} opt_callback Function called when the
+ * Begins playback of a timeline.
+ * @param {!sm.runtime.PlaybackState} state Runtime-specific state information.
+ * @param {(function(): void)=} opt_callback Function called when the
  *     timeline ends.
  */
 sm.runtime.Runtime.prototype.play = function(state, opt_callback) {
@@ -129,8 +130,8 @@ sm.runtime.Runtime.prototype.play = function(state, opt_callback) {
 
 
 /**
- * Stop a currently playing timeline.
- * @param {sm.runtime.PlaybackState} state Runtime-specific state information.
+ * Stops a currently playing timeline.
+ * @param {!sm.runtime.PlaybackState} state Runtime-specific state information.
  */
 sm.runtime.Runtime.prototype.stop = function(state) {
   if (!state.playing) {

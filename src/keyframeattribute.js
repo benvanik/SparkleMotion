@@ -130,10 +130,10 @@ sm.KeyframeAttribute.prototype.setTimingFunction = function(timingFunction) {
  *     data.
  */
 sm.KeyframeAttribute.deserialize = function(data) {
-  var name = /** @type {string} */ (data['name']);
-  var value = /** @type {string|number|undefined} */ (data['value']);
+  var name = /** @type {string} */ (data['n']);
+  var value = /** @type {string|number|undefined} */ (data['v']);
   var timingFunction = new sm.TimingFunction(
-      /** @type {string|!Array.<number>} */ (data['timingFunction']));
+      /** @type {string|!Array.<number>} */ (data['f']));
   var attribute = new sm.KeyframeAttribute(name, value, timingFunction);
   return attribute;
 };
@@ -145,9 +145,9 @@ sm.KeyframeAttribute.deserialize = function(data) {
  */
 sm.KeyframeAttribute.prototype.serialize = function() {
   var data = {
-    'name': this.name_,
-    'value': this.value_,
-    'timingFunction': this.timingFunction_.value
+    'n': this.name_,
+    'v': this.value_,
+    'f': this.timingFunction_.value
   };
   return data;
 };

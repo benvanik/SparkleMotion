@@ -48,10 +48,10 @@ sm.getDefaultRuntime = function() {
 
 
 /**
- * Create a new timeline. Optionally use the given map for
+ * Creates a new timeline. Optionally use the given map for
  * all target lookups (otherwise, document.getElementById will be used).
  * @param {string} name Unique timeline name.
- * @return {sm.Timeline} A new timeline instance.
+ * @return {!sm.Timeline} A new timeline instance.
  */
 sm.createTimeline = function(name) {
   var runtime = sm.runtime_ || sm.setupRuntime_();
@@ -61,10 +61,10 @@ sm.createTimeline = function(name) {
 
 
 /**
- * Load a timeline from the given JSON data. Optionally use the given map for
+ * Loads a timeline from the given JSON data. Optionally use the given map for
  * all target lookups (otherwise, document.getElementById will be used).
- * @param {Object} data JSON-serialized timeline.
- * @return {sm.Timeline} The timeline instance.
+ * @param {!Object} data JSON-serialized timeline.
+ * @return {!sm.Timeline} The timeline instance.
  */
 sm.loadTimeline = function(data) {
   var runtime = sm.runtime_ || sm.setupRuntime_();
@@ -74,10 +74,10 @@ sm.loadTimeline = function(data) {
 
 
 /**
- * Setup a playback sequence.
- * @param {sm.Timeline} timeline Timeline to start playing.
- * @param {Object.<string, Object>=} opt_scope Target lookup map.
- * @return {sm.Sequence} A new playback sequence.
+ * Sets up a playback sequence.
+ * @param {!sm.Timeline} timeline Timeline to start playing.
+ * @param {!Object.<!Object>=} opt_scope Target lookup map.
+ * @return {!sm.Sequence} A new playback sequence.
  */
 sm.sequenceTimeline = function(timeline, opt_scope) {
   if (!sm.runtime_) {
